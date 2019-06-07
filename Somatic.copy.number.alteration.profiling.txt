@@ -1,0 +1,2 @@
+Copy number segmentation was performed using the R package QDNAseq, employing 5 million input reads of the qG4-ChIP-seq
+related input libraries (genomic background for G4-ChIP) and 100 kb resolution (see R script). Copy number alterations were classified according to assigned segmentation values (log2 fold ratio), assigning regions as highly amplified (AMP, '> 0.75'), amplified (GAIN, '<=0.75 & > 0.25'), stable (NEUT, '<=0.25 & >= -0.3'), heterozygous deletions (HETD, '< -0.3 & > -1.4') and homozygous deletions (HOMD, '<= -1.4').
