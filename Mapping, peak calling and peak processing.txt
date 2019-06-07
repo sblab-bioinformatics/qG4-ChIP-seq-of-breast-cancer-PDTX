@@ -1,0 +1,227 @@
+#Mapping, peak calling and peak processing
+#########################################
+Raw FASTQ reads were trimmed to remove adaptor contamination and aligned to a combined genome containing Homo sapiens (hg19),
+Drosophila (dm6) and Mus musculus (mm10) using cutadapt29 and bwa28, respectively. Reads with a mapping quality below ten or
+marked as positional duplicates were excluded from further analysis. Enriched G4-ChIP-seq peaks were mapped using MACS2.030. 
+The bedtools package (http://bedtools.readthedocs.org) multiinter was employed to process MACS2.0-called peak intervals 
+(enriched G4 regions) and to generate high-confidence (2 out of 4) peak overlaps between technical G4-ChIP-seq replicates; 
+partial peak overlaps below 100 bp were removed from high-confidence peak overlaps of hg19 libaries.
+
+#Remove illumina Nextera adapter
+###############################
+for f in `find . -name '*.gz'`
+do
+  sbatch --mem 8G -o $f.out -e $f.err -J cutadapt --wrap "~/.local/bin/cutadapt -m 10 -q 20 -O 3 -a CTGTCTCTTATACACATCT -o ${f%%.fastq.gz}.trimmed.fastq.gz $f"
+done
+
+
+#Bwa alignment, cleanup and sorting
+###################################
+cat ucsc.hg19_mmu10.fa dm6.fa > hg19_mm10_dm6.fa
+
+sbatch --mem 32G -o index.out -e index.err -J bwa_index --wrap "bwa index -a bwtsw hg19_mm10_dm6.fa"
+
+mkdir bam_all
+
+genome='/Users/hansel01/reference_data/hg19_mm10_dm6/hg19_mm10_dm6.fa'
+for f in `find . -name '*.trimmed.fastq.gz'`
+do
+  bname=`basename $f`
+  sbatch --mem 16G -o $f.bwa.out -e $f.bwa.err -J bwa --wrap "/home/bioinformatics/software/bwa/bwa-0.7.15/bwa mem -t 8 -M $genome $f | samtools view -Sb -F2308 -q 10 > bam_all/${bname%%.trimmed.fastq.gz}.hg19_mm10_dm6.bam"
+done
+
+# Sort bam files and split species using the genome bed files
+#############################################################
+for f in *bam
+do
+  sbatch --mem 16G -o $f.out -e $f.err -J sort --wrap "/Users/hansel01/bin/samtools sort -@ 8 $f > ${f%%.bam}.sort.bam"
+done
+
+rm *dm6.bam
+
+
+# Species splitting
+###################
+for f in *bam
+do
+  sbatch --mem 8G -o $f.out -e $f.err -J view --wrap "/Users/hansel01/bin/samtools view -b -@8 $f -L /Users/hansel01/reference_data/hg19_mm10_dm6/hg19.genome.bed > ${f%%.hg19_mm10_dm6.sort.bam}.hg19.bam"
+done
+
+for f in *bam
+do
+  sbatch --mem 8G -o $f.out -e $f.err -J view --wrap "/Users/hansel01/bin/samtools view -b -@8 $f -L /Users/hansel01/reference_data/hg19_mm10_dm6/dm6.genome.bed > ${f%%.hg19_mm10_dm6.sort.bam}.dm6.bam"
+done
+
+for f in *bam
+do
+  sbatch --mem 8G -o $f.out -e $f.err -J view --wrap "/Users/hansel01/bin/samtools view -b -@8 $f -L /Users/hansel01/reference_data/hg19_mm10_dm6/mm10.genome.bed > ${f%%.hg19_mm10_dm6.sort.bam}.mm10.bam"
+done
+
+rm *hg19_mm10_dm6.sort.bam
+
+# Merge files of same condition and same sequencing run
+#######################################################
+for f in *_L001.dm6.bam
+do
+  sbatch --mem 8G -o $f.out -e $f.err -J merge --wrap "/Users/hansel01/bin/samtools merge -@8 ${f%%_L001.*}.all.dm6.merged.bam ${f%%_L001.*}_L00*dm6.bam"
+done
+
+for f in *_L005.dm6.bam
+do
+  sbatch --mem 8G -o $f.out -e $f.err -J merge --wrap "/Users/hansel01/bin/samtools merge -@8 ${f%%_L005.*}.all.dm6.merged.bam ${f%%_L005.*}_L00*dm6.bam"
+done
+
+
+
+for f in *_L001.mm10.bam
+do
+  sbatch --mem 8G -o $f.out -e $f.err -J merge --wrap "/Users/hansel01/bin/samtools merge -@8 ${f%%_L001.*}.all.mm10.merged.bam ${f%%_L001.*}_L00*mm10.bam"
+done
+
+for f in *_L005.mm10.bam
+do
+  sbatch --mem 8G -o $f.out -e $f.err -J merge --wrap "/Users/hansel01/bin/samtools merge -@8 ${f%%_L005.*}.all.mm10.merged.bam ${f%%_L005.*}_L00*mm10.bam"
+done
+
+
+
+for f in *_L001.hg19.bam
+do
+  sbatch --mem 8G -o $f.out -e $f.err -J merge --wrap "/Users/hansel01/bin/samtools merge -@8 ${f%%_L001.*}.all.hg19.merged.bam ${f%%_L001.*}_L00*hg19.bam"
+done
+
+
+for f in *_L005.hg19.bam
+do
+  sbatch --mem 8G -o $f.out -e $f.err -J merge --wrap "/Users/hansel01/bin/samtools merge -@8 ${f%%_L005.*}.all.hg19.merged.bam ${f%%_L005.*}_L00*hg19.bam"
+done
+
+rm *hg19.bam && rm *dm6.bam && rm *mm10.bam
+
+
+#Mark and remove duplicates
+###########################
+for f in *merged.bam
+do
+  sbatch --mem 8G -o $f.out -e $f.err -J dups --wrap "java -Xmx7g -jar /Users/hansel01/bin/picard.jar MarkDuplicates I=$f O=${f%%.bam}.nodup.bam M=${f%%.bam}.md.txt AS=true REMOVE_DUPLICATES=true"
+done
+
+ rm *merged.bam
+
+#Some basic dup and size stats
+##############################
+grep 'Unknown Library' *txt > dups_info.txt
+
+for f in *nodup.bam; do echo $f;echo $f >> all_counts &&  samtools view -c $f >> all_counts; done
+
+
+#Downsample hg19 input files above 25M reads to 25M read depth. Downsample dm6 input files to 5M input read depth. 
+#######################################################
+
+PDTX.lib	depth	norm.depth.factor.(25M)
+139M_181_input.all.hg19.merged.nodup.bam	30643596	0.815831145
+139M_284_input.all.hg19.merged.nodup.bam	37657614	0.663876368
+179_181_input.all.hg19.merged.nodup.bam	50349236	0.496531864
+179_284_input.all.hg19.merged.nodup.bam	81168138	0.30800263
+201_181_input.all.hg19.merged.nodup.bam	142044808	0.176000801
+201_284_input.all.hg19.merged.nodup.bam	70353157	0.35535008
+331_284_input.all.hg19.merged.nodup.bam	42072374	0.594214151
+521_284_input.all.hg19.merged.nodup.bam	49566414	0.504373788
+98_181_input.all.hg19.merged.nodup.bam	61734504	0.404959923
+
+sbatch --mem 16G -o $f.out -e $f.err -J downsample --wrap "samtools view -@ 8 -s 0.815831145 -b 139M_181_input.all.hg19.merged.nodup.bam > ${f%%.bam}.25M.bam"
+sbatch --mem 16G -o $f.out -e $f.err -J downsample --wrap "samtools view -@ 8 -s 0.663876368 -b 139M_284_input.all.hg19.merged.nodup.bam > ${f%%.bam}.25M.bam"
+sbatch --mem 16G -o $f.out -e $f.err -J downsample --wrap "samtools view -@ 8 -s 0.496531864 -b 179_181_input.all.hg19.merged.nodup.bam > ${f%%.bam}.25M.bam"
+sbatch --mem 16G -o $f.out -e $f.err -J downsample --wrap "samtools view -@ 8 -s 0.30800263 -b 179_284_input.all.hg19.merged.nodup.bam > ${f%%.bam}.25M.bam"
+sbatch --mem 16G -o $f.out -e $f.err -J downsample --wrap "samtools view -@ 8 -s 0.176000801 -b 201_181_input.all.hg19.merged.nodup.bam > ${f%%.bam}.25M.bam"
+sbatch --mem 16G -o $f.out -e $f.err -J downsample --wrap "samtools view -@ 8 -s 0.35535008 -b 201_284_input.all.hg19.merged.nodup.bam > ${f%%.bam}.25M.bam"
+sbatch --mem 16G -o $f.out -e $f.err -J downsample --wrap "samtools view -@ 8 -s 0.594214151 -b 331_284_input.all.hg19.merged.nodup.bam > ${f%%.bam}.25M.bam"
+sbatch --mem 16G -o $f.out -e $f.err -J downsample --wrap "samtools view -@ 8 -s 0.504373788 -b 521_284_input.all.hg19.merged.nodup.bam > ${f%%.bam}.25M.bam"
+sbatch --mem 16G -o $f.out -e $f.err -J downsample --wrap "samtools view -@ 8 -s 0.404959923 -b 98_181_input.all.hg19.merged.nodup.bam > ${f%%.bam}.25M.bam"
+
+
+
+PDTX.lib	depth	norm.depth.factor.(5M)
+139M_284_input.all.dm6.merged.nodup.bam	9630075	0.519206756
+143_317_input.dm6.merged.nodup.bam	5421848	0.922194794
+179_181_input.all.dm6.merged.nodup.bam	9854212	0.507397243
+179_284_input.all.dm6.merged.nodup.bam	18670102	0.267807857
+201_181_input.all.dm6.merged.nodup.bam	20506495	0.243825188
+201_284_input.all.dm6.merged.nodup.bam	12439435	0.401947516
+316_284_input.all.dm6.merged.nodup.bam	9417443	0.53092968
+331_284_input.all.dm6.merged.nodup.bam	7317725	0.683272465
+521_284_input.all.dm6.merged.nodup.bam	8128348	0.615131143
+5_317_input.dm6.merged.nodup.bam	9770818	0.511727882
+863_317_input.dm6.merged.nodup.bam	5749957	0.86957172
+9_317_input.dm6.merged.nodup.bam	6637176	0.753332441
+98_181_input.all.dm6.merged.nodup.bam	11323957	0.441541768
+98_284_input.all.dm6.merged.nodup.bam	5827513	0.857998944
+
+
+sbatch --mem 16G -o $f.out -e $f.err -J downsample --wrap "samtools view -@ 8 -s 0.519206756 -b 139M_284_input.all.dm6.merged.nodup.bam > ${f%%.bam}.5M.bam"
+sbatch --mem 16G -o $f.out -e $f.err -J downsample --wrap "samtools view -@ 8 -s 0.922194794 -b 143_317_input.dm6.merged.nodup.bam > ${f%%.bam}.5M.bam"
+sbatch --mem 16G -o $f.out -e $f.err -J downsample --wrap "samtools view -@ 8 -s 0.507397243 -b 179_181_input.all.dm6.merged.nodup.bam > ${f%%.bam}.5M.bam"
+sbatch --mem 16G -o $f.out -e $f.err -J downsample --wrap "samtools view -@ 8 -s 0.267807857 -b 179_284_input.all.dm6.merged.nodup.bam > ${f%%.bam}.5M.bam"
+sbatch --mem 16G -o $f.out -e $f.err -J downsample --wrap "samtools view -@ 8 -s 0.243825188 -b 201_181_input.all.dm6.merged.nodup.bam > ${f%%.bam}.5M.bam"
+sbatch --mem 16G -o $f.out -e $f.err -J downsample --wrap "samtools view -@ 8 -s 0.401947516 -b 201_284_input.all.dm6.merged.nodup.bam > ${f%%.bam}.5M.bam"
+sbatch --mem 16G -o $f.out -e $f.err -J downsample --wrap "samtools view -@ 8 -s 0.53092968 -b 316_284_input.all.dm6.merged.nodup.bam > ${f%%.bam}.5M.bam"
+sbatch --mem 16G -o $f.out -e $f.err -J downsample --wrap "samtools view -@ 8 -s 0.683272465 -b 331_284_input.all.dm6.merged.nodup.bam > ${f%%.bam}.5M.bam"
+sbatch --mem 16G -o $f.out -e $f.err -J downsample --wrap "samtools view -@ 8 -s 0.615131143 -b 521_284_input.all.dm6.merged.nodup.bam > ${f%%.bam}.5M.bam"
+sbatch --mem 16G -o $f.out -e $f.err -J downsample --wrap "samtools view -@ 8 -s 0.511727882 -b 5_317_input.dm6.merged.nodup.bam > ${f%%.bam}.5M.bam"
+sbatch --mem 16G -o $f.out -e $f.err -J downsample --wrap "samtools view -@ 8 -s 0.86957172 -b 863_317_input.dm6.merged.nodup.bam > ${f%%.bam}.5M.bam"
+sbatch --mem 16G -o $f.out -e $f.err -J downsample --wrap "samtools view -@ 8 -s 0.753332441 -b 9_317_input.dm6.merged.nodup.bam > ${f%%.bam}.5M.bam"
+sbatch --mem 16G -o $f.out -e $f.err -J downsample --wrap "samtools view -@ 8 -s 0.441541768 -b 98_181_input.all.dm6.merged.nodup.bam > ${f%%.bam}.5M.bam"
+sbatch --mem 16G -o $f.out -e $f.err -J downsample --wrap "samtools view -@ 8 -s 0.857998944 -b 98_284_input.all.dm6.merged.nodup.bam > ${f%%.bam}.5M.bam"
+
+for f in *5M.bam *25M.bam; do echo $f;echo $f >> all_counts && /Users/hansel01/bin/samtools view -c $f >> all_counts; done
+
+
+
+#Call peaks in dm6 and hg19
+####################################
+
+mkdir bam_hg19_25M
+mkdir macs2_output
+for f in *_R*.hg19.merged.nodup.bam
+do
+  f1=${f##*}
+  f2=${f1%%.merged*}
+  c=${f%%_R*}_input.all.hg19*${f2}*nodup*.bam
+  sbatch --mem 8G -o $f.out -e $f.err -J human --wrap "macs2 callpeak --name macs2_output/${f%%.merged.nodup.bam}.q005.all -t $f -c $c --format=BAM --gsize 'hs' --bw=300 --qvalue 0.05 --keep-dup 'all'"
+done
+
+mkdir bam_dm6_5M
+mkdir macs2_output
+for f in *_R*.dm6.merged.nodup.bam
+do
+  f1=${f##*}
+  f2=${f1%%.merged*}
+  c=${f%%_R*}_input.all.dm6*${f2}*nodup*.bam
+  sbatch --mem 8G -o $f.out -e $f.err -J human --wrap "macs2 callpeak --name macs2_output/${f%%.merged.nodup.bam}.q005.all.5M -t $f -c $c --format=BAM --gsize 'dm' --bw=300 --qvalue 0.05 --keep-dup 'all'"
+done
+
+
+#Calculate consensus unified peaks
+####################################
+
+/bam_hg19_25M/macs2_output/
+for f in *R1*hg19*narrowPeak
+do
+  echo $f
+  multiIntersectBed -i ${f%%_R1*}*hg19*.narrowPeak | awk '$4>=2' | sortBed -i - | mergeBed -i - > ${f%%.narrowPeak}.multi2.bed
+done
+
+cat *hg19*multi2.bed | sortBed -i - | mergeBed -i - > hg19.all_peaks.25M.bed
+
+#used excel and removed regions below 100  --> hg19.all_peaks.25M.over99nt.bed
+
+sort -k 1,1 -k2,2n hg19.all_peaks.25M.over99nt.bed > hg19.all_peaks.25M.over99nt.sort.bed
+
+/bam_dm6_5M/macs2_output/
+for f in *R1*dm6*5M*narrowPeak
+do
+  echo $f
+  multiIntersectBed -i ${f%%_R1*}*dm6*5M*.narrowPeak | awk '$4>=2' | sortBed -i - | mergeBed -i - > ${f%%.narrowPeak}.multi2.bed
+done
+
+cat *dm6*5M*multi2.bed | sortBed -i - | mergeBed -i - > dm6.all_peaks.5M.bed
