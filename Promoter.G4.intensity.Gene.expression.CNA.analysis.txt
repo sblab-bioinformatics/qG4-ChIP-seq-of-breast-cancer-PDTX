@@ -1,0 +1,166 @@
+Promoter - G4 intensity - Gene expression - CNA analysis. To evaluate if gene expression and/or CNA states critically 
+determine DG4R promoter prevalence, we classified promoters of each PDTX model into all possible combinations of CNA and 
+gene expression states, and respectively quantified the sum of DG4R signal (CPM) for each promoter category.
+
+ - 1) Use PDTX.vs.all (DG4Rs) data which contain log2-fold changes and CPM intensity.
+ - 2) For each PDTX models prepare DG4R positive gene promoter files showing all combinations in a) gene expression and b) CNA state,
+ and subsequently overlap with DG4R files containing cpm values from 1).
+ - 3) Sort Genes by sum.cpm value. Create sorted heatmap  y-axis genes (high to low CPM intensity) x-axis (AMP.high.exp, AMP.Med.exp., ...)
+ - 4) Gene promoter/G4 intensity correlation matrix
+ 
+ 
+===================
+ 1) Isolate from DG4R files --> PDTX_vs_all tab. files the chromosome coordinates and cpm value for, log2 >= 0.6
+===================
+
+for f in *_vs_all.tab.gz; do gzip -c -d $f | awk -F "\t" '{ if(($1 >= 0.6) && ($5 < 0.05)) { print } }' | awk -F "\t" '{print $6,$2}' | sed 's/"//g' | sed 's/_/\t/g' | sort -k1,1 -k2,2n > ${f%%.tab.gz}_up.cpm.bed; done
+
+sed -i 's/ /\t/g' *.cpm.bed
+
+find . -type f -empty -delete
+
+for f in *cpm.bed
+do
+    awk -F'\t' 'NF<=4 {print}' "$f" > scharf  &&  mv -f -- scharf "$f"
+done
+
+===================
+- 2) For each PDTX models prepare DG4R positive gene promoter files showing all combinations in a) gene expression and b) CNA state,
+ and subsequently overlap with DG4R files containing cpm values form 1).
+===================
+
+#Take peak_counts.norm_filtered.detable.*_vs_all_up.bed.int.*.100kb.bed files from 
+"DG4R/CG4R enrichment in CNA classifications relative to random permutation." analysis and intersect with either high, low, or med. 
+expressed gene promoters to retrieve promoter that are positive for all combinations of DG4R, CNA, Gene expression level.
+
+139M_expression_high.TSS1kbp.plus.minus.bed 139M_expression_low.TSS1kbp.plus.minus.bed 139M_expression_mid.TSS1kbp.plus.minus.bed 
+143_expression_high.TSS1kbp.plus.minus.bed 143_expression_low.TSS1kbp.plus.minus.bed 143_expression_mid.TSS1kbp.plus.minus.bed 
+179_expression_high.TSS1kbp.plus.minus.bed 179_expression_low.TSS1kbp.plus.minus.bed 179_expression_mid.TSS1kbp.plus.minus.bed 
+201_expression_high.TSS1kbp.plus.minus.bed 201_expression_low.TSS1kbp.plus.minus.bed 201_expression_mid.TSS1kbp.plus.minus.bed 
+316_expression_high.TSS1kbp.plus.minus.bed 316_expression_low.TSS1kbp.plus.minus.bed 316_expression_mid.TSS1kbp.plus.minus.bed 
+521M_expression_high.TSS1kbp.plus.minus.bed 521M_expression_low.TSS1kbp.plus.minus.bed 521M_expression_mid.TSS1kbp.plus.minus.bed 
+5_expression_high.TSS1kbp.plus.minus.bed 5_expression_low.TSS1kbp.plus.minus.bed 5_expression_mid.TSS1kbp.plus.minus.bed 
+98_expression_high.TSS1kbp.plus.minus.bed 98_expression_low.TSS1kbp.plus.minus.bed 98_expression_mid.TSS1kbp.plus.minus.bed 
+9_expression_high.TSS1kbp.plus.minus.bed 9_expression_low.TSS1kbp.plus.minus.bed 9_expression_mid.TSS1kbp.plus.minus.bed
+
+
+for f in peak_counts.norm_filtered.detable.98_vs_all_up.int.*.100kb.bed; do bedtools -loj $f -b 98_expression_high.TSS1kbp.plus.minus.bed > ${f%%.bed}.int.TSS1kbp.plus.minus.high.exp.98.bed; done
+for f in peak_counts.norm_filtered.detable.98_vs_all_up.int.*.100kb.bed; do bedtools -loj $f -b 98_expression_mid.TSS1kbp.plus.minus.bed > ${f%%.bed}.int.TSS1kbp.plus.minus.mid.exp.98.bed; done
+for f in peak_counts.norm_filtered.detable.98_vs_all_up.int.*.100kb.bed; do bedtools -loj $f -b 98_expression_low.TSS1kbp.plus.minus.bed > ${f%%.bed}.int.TSS1kbp.plus.minus.low.exp.98.bed; done
+
+for f in peak_counts.norm_filtered.detable.139M_vs_all_up.int.*.100kb.bed; do bedtools -loj $f -b 139M_expression_high.TSS1kbp.plus.minus.bed > ${f%%.bed}.int.TSS1kbp.plus.minus.high.exp.139M.bed; done
+for f in peak_counts.norm_filtered.detable.139M_vs_all_up.int.*.100kb.bed; do bedtools -loj $f -b 139M_expression_mid.TSS1kbp.plus.minus.bed > ${f%%.bed}.int.TSS1kbp.plus.minus.mid.exp.139M.bed; done
+for f in peak_counts.norm_filtered.detable.139M_vs_all_up.int.*.100kb.bed; do bedtools -loj $f -b 139M_expression_low.TSS1kbp.plus.minus.bed > ${f%%.bed}.int.TSS1kbp.plus.minus.low.exp.139M.bed; done
+
+for f in peak_counts.norm_filtered.detable.143_vs_all_up.int.*.100kb.bed; do bedtools -loj $f -b 143_expression_high.TSS1kbp.plus.minus.bed > ${f%%.bed}.int.TSS1kbp.plus.minus.high.exp.143.bed; done
+for f in peak_counts.norm_filtered.detable.143_vs_all_up.int.*.100kb.bed; do bedtools -loj $f -b 143_expression_mid.TSS1kbp.plus.minus.bed > ${f%%.bed}.int.TSS1kbp.plus.minus.mid.exp.143.bed; done
+for f in peak_counts.norm_filtered.detable.143_vs_all_up.int.*.100kb.bed; do bedtools -loj $f -b 143_expression_low.TSS1kbp.plus.minus.bed > ${f%%.bed}.int.TSS1kbp.plus.minus.low.exp.143.bed; done
+
+for f in peak_counts.norm_filtered.detable.179_vs_all_up.int.*.100kb.bed; do bedtools -loj $f -b 179_expression_high.TSS1kbp.plus.minus.bed > ${f%%.bed}.int.TSS1kbp.plus.minus.high.exp.179.bed; done
+for f in peak_counts.norm_filtered.detable.179_vs_all_up.int.*.100kb.bed; do bedtools -loj $f -b 179_expression_mid.TSS1kbp.plus.minus.bed > ${f%%.bed}.int.TSS1kbp.plus.minus.mid.exp.179.bed; done
+for f in peak_counts.norm_filtered.detable.179_vs_all_up.int.*.100kb.bed; do bedtools -loj $f -b 179_expression_low.TSS1kbp.plus.minus.bed > ${f%%.bed}.int.TSS1kbp.plus.minus.low.exp.179.bed; done
+
+for f in peak_counts.norm_filtered.detable.201_vs_all_up.int.*.100kb.bed; do bedtools -loj $f -b 201_expression_high.TSS1kbp.plus.minus.bed > ${f%%.bed}.int.TSS1kbp.plus.minus.high.exp.201.bed; done
+for f in peak_counts.norm_filtered.detable.201_vs_all_up.int.*.100kb.bed; do bedtools -loj $f -b 201_expression_mid.TSS1kbp.plus.minus.bed > ${f%%.bed}.int.TSS1kbp.plus.minus.mid.exp.201.bed; done
+for f in peak_counts.norm_filtered.detable.201_vs_all_up.int.*.100kb.bed; do bedtools -loj $f -b 201_expression_low.TSS1kbp.plus.minus.bed > ${f%%.bed}.int.TSS1kbp.plus.minus.low.exp.201.bed; done
+
+for f in peak_counts.norm_filtered.detable.316_vs_all_up.int.*.100kb.bed; do bedtools -loj $f -b 316_expression_high.TSS1kbp.plus.minus.bed > ${f%%.bed}.int.TSS1kbp.plus.minus.high.exp.316.bed; done
+for f in peak_counts.norm_filtered.detable.316_vs_all_up.int.*.100kb.bed; do bedtools -loj $f -b 316_expression_mid.TSS1kbp.plus.minus.bed > ${f%%.bed}.int.TSS1kbp.plus.minus.mid.exp.316.bed; done
+for f in peak_counts.norm_filtered.detable.316_vs_all_up.int.*.100kb.bed; do bedtools -loj $f -b 316_expression_low.TSS1kbp.plus.minus.bed > ${f%%.bed}.int.TSS1kbp.plus.minus.low.exp.316.bed; done
+
+for f in peak_counts.norm_filtered.detable.331_vs_all_up.int.*.100kb.bed; do bedtools -loj $f -b 331_expression_high.TSS1kbp.plus.minus.bed > ${f%%.bed}.int.TSS1kbp.plus.minus.high.exp.331.bed; done
+for f in peak_counts.norm_filtered.detable.331_vs_all_up.int.*.100kb.bed; do bedtools -loj $f -b 331_expression_mid.TSS1kbp.plus.minus.bed > ${f%%.bed}.int.TSS1kbp.plus.minus.mid.exp.331.bed; done
+for f in peak_counts.norm_filtered.detable.331_vs_all_up.int.*.100kb.bed; do bedtools -loj $f -b 331_expression_low.TSS1kbp.plus.minus.bed > ${f%%.bed}.int.TSS1kbp.plus.minus.low.exp.331.bed; done
+
+for f in peak_counts.norm_filtered.detable.521_vs_all_up.int.*.100kb.bed; do bedtools -loj $f -b 521M_expression_high.TSS1kbp.plus.minus.bed > ${f%%.bed}.int.TSS1kbp.plus.minus.high.exp.521M.bed; done
+for f in peak_counts.norm_filtered.detable.521_vs_all_up.int.*.100kb.bed; do bedtools -loj $f -b 521M_expression_mid.TSS1kbp.plus.minus.bed > ${f%%.bed}.int.TSS1kbp.plus.minus.mid.exp.521M.bed; done
+for f in peak_counts.norm_filtered.detable.521_vs_all_up.int.*.100kb.bed; do bedtools -loj $f -b 521M_expression_low.TSS1kbp.plus.minus.bed > ${f%%.bed}.int.TSS1kbp.plus.minus.low.exp.521M.bed; done
+
+for f in peak_counts.norm_filtered.detable.5_vs_all_up.int.*.100kb.bed; do bedtools -loj $f -b 5_expression_high.TSS1kbp.plus.minus.bed > ${f%%.bed}.int.TSS1kbp.plus.minus.high.exp.5.bed; done
+for f in peak_counts.norm_filtered.detable.5_vs_all_up.int.*.100kb.bed; do bedtools -loj $f -b 5_expression_mid.TSS1kbp.plus.minus.bed > ${f%%.bed}.int.TSS1kbp.plus.minus.mid.exp.5.bed; done
+for f in peak_counts.norm_filtered.detable.5_vs_all_up.int.*.100kb.bed; do bedtools -loj $f -b 5_expression_low.TSS1kbp.plus.minus.bed > ${f%%.bed}.int.TSS1kbp.plus.minus.low.exp.5.bed; done
+
+for f in peak_counts.norm_filtered.detable.9_vs_all_up.int.*.100kb.bed; do bedtools -loj $f -b 9_expression_high.TSS1kbp.plus.minus.bed > ${f%%.bed}.int.TSS1kbp.plus.minus.high.exp.9.bed; done
+for f in peak_counts.norm_filtered.detable.9_vs_all_up.int.*.100kb.bed; do bedtools -loj $f -b 9_expression_mid.TSS1kbp.plus.minus.bed > ${f%%.bed}.int.TSS1kbp.plus.minus.mid.exp.9.bed; done
+for f in peak_counts.norm_filtered.detable.9_vs_all_up.int.*.100kb.bed; do bedtools -loj $f -b 9_expression_low.TSS1kbp.plus.minus.bed > ${f%%.bed}.int.TSS1kbp.plus.minus.low.exp.9.bed; done
+
+for f in peak_counts.norm_filtered.detable.863_vs_all_up.int.*.100kb.bed; do bedtools -loj $f -b 863_expression_high.TSS1kbp.plus.minus.bed > ${f%%.bed}.int.TSS1kbp.plus.minus.high.exp.863.bed; done
+for f in peak_counts.norm_filtered.detable.863_vs_all_up.int.*.100kb.bed; do bedtools -loj $f -b 863_expression_mid.TSS1kbp.plus.minus.bed > ${f%%.bed}.int.TSS1kbp.plus.minus.mid.exp.863.bed; done
+for f in peak_counts.norm_filtered.detable.863_vs_all_up.int.*.100kb.bed; do bedtools -loj $f -b 863_expression_low.TSS1kbp.plus.minus.bed > ${f%%.bed}.int.TSS1kbp.plus.minus.low.exp.863.bed; done
+
+
+
+
+for f in peak_counts.norm_filtered.detable.9_vs_all_up.int.*.100kb.int.TSS1kbp.plus.minus.*.exp.9.bed; do bedtools intersect -loj -a $f -b peak_counts.norm_filtered.detable.9_vs_all_up.cpm.bed | cut -f 1,2,3,4,5,9 | sortBed -i | awk '!a[$0]++' | awk -F"\t" '{print $1"\t"$2"\t"$3"\t"$4"\t"$5"\t"exp($6*log(2));}' | mergeBed -c 4,5,6 -o first,first,sum > ${f%%.bed}.sum.cpm.bed; done
+
+for f in peak_counts.norm_filtered.detable.5_vs_all_up.int.*.100kb.int.TSS1kbp.plus.minus.*.exp.5.bed; do bedtools intersect -loj -a $f -b peak_counts.norm_filtered.detable.5_vs_all_up.cpm.bed | cut -f 1,2,3,4,5,9 | sortBed -i | awk '!a[$0]++' | awk -F"\t" '{print $1"\t"$2"\t"$3"\t"$4"\t"$5"\t"exp($6*log(2));}' | mergeBed -c 4,5,6 -o first,first,sum > ${f%%.bed}.sum.cpm.bed; done
+
+for f in peak_counts.norm_filtered.detable.139M_vs_all_up.int.*.100kb.int.TSS1kbp.plus.minus.*.exp.139M.bed; do bedtools intersect -loj -a $f -b peak_counts.norm_filtered.detable.139M_vs_all_up.cpm.bed | cut -f 1,2,3,4,5,9 | sortBed -i | awk '!a[$0]++' | awk -F"\t" '{print $1"\t"$2"\t"$3"\t"$4"\t"$5"\t"exp($6*log(2));}' | mergeBed -c 4,5,6 -o first,first,sum > ${f%%.bed}.sum.cpm.bed; done
+
+for f in peak_counts.norm_filtered.detable.143_vs_all_up.int.*.100kb.int.TSS1kbp.plus.minus.*.exp.143.bed; do bedtools intersect -loj -a $f -b peak_counts.norm_filtered.detable.143_vs_all_up.cpm.bed | cut -f 1,2,3,4,5,9 | sortBed -i | awk '!a[$0]++' | awk -F"\t" '{print $1"\t"$2"\t"$3"\t"$4"\t"$5"\t"exp($6*log(2));}' | mergeBed -c 4,5,6 -o first,first,sum > ${f%%.bed}.sum.cpm.bed; done
+
+for f in peak_counts.norm_filtered.detable.179_vs_all_up.int.*.100kb.int.TSS1kbp.plus.minus.*.exp.179.bed; do bedtools intersect -loj -a $f -b peak_counts.norm_filtered.detable.179_vs_all_up.cpm.bed | cut -f 1,2,3,4,5,9 | sortBed -i | awk '!a[$0]++' | awk -F"\t" '{print $1"\t"$2"\t"$3"\t"$4"\t"$5"\t"exp($6*log(2));}' | mergeBed -c 4,5,6 -o first,first,sum > ${f%%.bed}.sum.cpm.bed; done
+
+for f in peak_counts.norm_filtered.detable.201_vs_all_up.int.*.100kb.int.TSS1kbp.plus.minus.*.exp.201.bed; do bedtools intersect -loj -a $f -b peak_counts.norm_filtered.detable.201_vs_all_up.cpm.bed | cut -f 1,2,3,4,5,9 | sortBed -i | awk '!a[$0]++' | awk -F"\t" '{print $1"\t"$2"\t"$3"\t"$4"\t"$5"\t"exp($6*log(2));}' | mergeBed -c 4,5,6 -o first,first,sum > ${f%%.bed}.sum.cpm.bed; done
+
+for f in peak_counts.norm_filtered.detable.316_vs_all_up.int.*.100kb.int.TSS1kbp.plus.minus.*.exp.316.bed; do bedtools intersect -loj -a $f -b peak_counts.norm_filtered.detable.316_vs_all_up.cpm.bed | cut -f 1,2,3,4,5,9 | sortBed -i | awk '!a[$0]++' | awk -F"\t" '{print $1"\t"$2"\t"$3"\t"$4"\t"$5"\t"exp($6*log(2));}' | mergeBed -c 4,5,6 -o first,first,sum > ${f%%.bed}.sum.cpm.bed; done
+
+for f in peak_counts.norm_filtered.detable.521_vs_all_up.int.*.100kb.int.TSS1kbp.plus.minus.*.exp.521M.bed; do bedtools intersect -loj -a $f -b peak_counts.norm_filtered.detable.521_vs_all_up.cpm.bed | cut -f 1,2,3,4,5,9 | sortBed -i | awk '!a[$0]++' | awk -F"\t" '{print $1"\t"$2"\t"$3"\t"$4"\t"$5"\t"exp($6*log(2));}' | mergeBed -c 4,5,6 -o first,first,sum > ${f%%.bed}.sum.cpm.bed; done
+
+for f in peak_counts.norm_filtered.detable.98_vs_all_up.int.*.100kb.int.TSS1kbp.plus.minus.*.exp.98.bed; do bedtools intersect -loj -a $f -b peak_counts.norm_filtered.detable.98_vs_all_up.cpm.bed | cut -f 1,2,3,4,5,9 | sortBed -i | awk '!a[$0]++' | awk -F"\t" '{print $1"\t"$2"\t"$3"\t"$4"\t"$5"\t"exp($6*log(2));}' | mergeBed -c 4,5,6 -o first,first,sum > ${f%%.bed}.sum.cpm.bed; done
+
+
+
+#combine all G4.intensity genes from all models for a particular CNA.gene.expression.promoter category (*.detable.*_vs_all_up.int.AMP.100kb.int.TSS1kbp.plus.minus.high.exp.*.sum.cpm.bed = AMP.high.exp)
+
+cat *.detable.*_vs_all_up.int.AMP.100kb.int.TSS1kbp.plus.minus.high.exp.*.sum.cpm.bed | sortBed -i | mergeBed -c 4,5,6 -o first,first,median > cat.AMP.high.exp.prom.sum.cpm.bed
+
+cat *.detable.*_vs_all_up.int.AMP.100kb.int.TSS1kbp.plus.minus.mid.exp.*.sum.cpm.bed | sortBed -i | mergeBed -c 4,5,6 -o first,first,median > cat.AMP.mid.exp.prom.sum.cpm.bed
+
+cat *.detable.*_vs_all_up.int.AMP.100kb.int.TSS1kbp.plus.minus.low.exp.*.sum.cpm.bed | sortBed -i | mergeBed -c 4,5,6 -o first,first,median > cat.AMP.low.exp.prom.sum.cpm.bed
+
+
+cat *.detable.*_vs_all_up.int.GAIN.100kb.int.TSS1kbp.plus.minus.high.exp.*.sum.cpm.bed | sortBed -i | mergeBed -c 4,5,6 -o first,first,median > cat.GAIN.high.exp.prom.sum.cpm.bed
+
+cat *.detable.*_vs_all_up.int.GAIN.100kb.int.TSS1kbp.plus.minus.mid.exp.*.sum.cpm.bed | sortBed -i | mergeBed -c 4,5,6 -o first,first,median > cat.GAIN.mid.exp.prom.sum.cpm.bed
+
+cat *.detable.*_vs_all_up.int.GAIN.100kb.int.TSS1kbp.plus.minus.low.exp.*.sum.cpm.bed | sortBed -i | mergeBed -c 4,5,6 -o first,first,median > cat.GAIN.low.exp.prom.sum.cpm.bed
+
+
+cat *.detable.*_vs_all_up.int.NEUT.100kb.int.TSS1kbp.plus.minus.high.exp.*.sum.cpm.bed | sortBed -i | mergeBed -c 4,5,6 -o first,first,median > cat.NEUT.high.exp.prom.sum.cpm.bed
+
+cat *.detable.*_vs_all_up.int.NEUT.100kb.int.TSS1kbp.plus.minus.mid.exp.*.sum.cpm.bed | sortBed -i | mergeBed -c 4,5,6 -o first,first,median > cat.NEUT.mid.exp.prom.sum.cpm.bed
+
+cat *.detable.*_vs_all_up.int.NEUT.100kb.int.TSS1kbp.plus.minus.low.exp.*.sum.cpm.bed | sortBed -i | mergeBed -c 4,5,6 -o first,first,median > cat.NEUT.low.exp.prom.sum.cpm.bed
+
+
+cat *.detable.*_vs_all_up.int.HETD.100kb.int.TSS1kbp.plus.minus.high.exp.*.sum.cpm.bed | sortBed -i | mergeBed -c 4,5,6 -o first,first,median > cat.HETD.high.exp.prom.sum.cpm.bed
+
+cat *.detable.*_vs_all_up.int.HETD.100kb.int.TSS1kbp.plus.minus.mid.exp.*.sum.cpm.bed | sortBed -i | mergeBed -c 4,5,6 -o first,first,median > cat.HETD.mid.exp.prom.sum.cpm.bed
+
+cat *.detable.*_vs_all_up.int.HETD.100kb.int.TSS1kbp.plus.minus.low.exp.*.sum.cpm.bed | sortBed -i | mergeBed -c 4,5,6 -o first,first,median > cat.HETD.low.exp.prom.sum.cpm.bed
+
+
+
+for f in cat.*.*.exp.prom.sum.cpm.bed; do cut -f 6 $f > ${f%%.bed}.txt; done
+
+
+for f in *detable.*.sum.cpm.bed; do cut -f 6 $f > ${f%%.bed}.txt; done
+
+
+#Compare G4.intensity of promoters in highly AMP or GAIN or Neut or HETD and expressed genes across PDTX models.
+
+for f in *.detable.*_vs_all_up.int.*.100kb.int.TSS1kbp.plus.minus.*.exp.*.sum.cpm.bed; do cut -f 6 $f | sort -n | awk ' { a[i++]=$1; } END { x=int((i+1)/2); if (x < (i+1)/2) print (a[x-1]+a[x])/2; else print a[x-1]; }' > ${f%%.sum.cpm.bed}.median; done 
+
+echo -e G4.median.cpm.AMP.High.Exp"\t"G4.median.cpm.AMP.Low.Exp"\t"G4.median.cpm.AMP.Mid.Exp"\t"G4.median.cpm.GAIN.High.Exp"\t"G4.median.cpm.GAIN.Low.Exp"\t"G4.median.cpm.GAIN.Mid.Exp"\t"G4.median.cpm.NEUT.High.Exp"\t"G4.median.cpm.NEUT.Low.Exp"\t"G4.median.cpm.NEUT.Mid.Exp"\t"G4.median.cpm.HETD.High.Exp"\t"G4.median.cpm.HETD.Low.Exp"\t"G4.median.cpm.HETD.Mid.Exp > header.G4.median.PDTX
+
+echo -e PDTX > header.PDTX && echo -e 139M > header.139M && echo -e 143 > header.143 && echo -e 179 > header.179 && echo -e 201 > header.201 && echo -e 316 > header.316 && echo -e 5 > header.5 && echo -e 521M > header.521M && echo -e 9 > header.9 && echo -e 98 > header.98 && cat header.* | head -9 > concat.header.PDTX && cat header.PDTX concat.header.PDTX > concat.row.header.final.PDTX
+
+paste peak_counts.norm_filtered.detable.139M_vs_all_up.int.*.100kb.int.TSS1kbp.plus.minus.*.exp.139M.median > pasted.G4.median.cpm.139M && paste peak_counts.norm_filtered.detable.143_vs_all_up.int.*.100kb.int.TSS1kbp.plus.minus.*.exp.143.median > pasted.G4.median.cpm.143 && paste peak_counts.norm_filtered.detable.179_vs_all_up.int.*.100kb.int.TSS1kbp.plus.minus.*.exp.179.median > pasted.G4.median.cpm.179 && paste peak_counts.norm_filtered.detable.201_vs_all_up.int.*.100kb.int.TSS1kbp.plus.minus.*.exp.201.median > pasted.G4.median.cpm.201 && paste peak_counts.norm_filtered.detable.316_vs_all_up.int.*.100kb.int.TSS1kbp.plus.minus.*.exp.316.median > pasted.G4.median.cpm.316 && paste peak_counts.norm_filtered.detable.521_vs_all_up.int.*.100kb.int.TSS1kbp.plus.minus.*.exp.521M.median > pasted.G4.median.cpm.521M && paste peak_counts.norm_filtered.detable.5_vs_all_up.int.*.100kb.int.TSS1kbp.plus.minus.*.exp.5.median > pasted.G4.median.cpm.5 && paste peak_counts.norm_filtered.detable.98_vs_all_up.int.*.100kb.int.TSS1kbp.plus.minus.*.exp.98.median > pasted.G4.median.cpm.98 && paste peak_counts.norm_filtered.detable.9_vs_all_up.int.*.100kb.int.TSS1kbp.plus.minus.*.exp.9.median > pasted.G4.median.cpm.9
+
+cat header.G4.median.PDTX pasted.G4.median.cpm.* > tmp1 && paste concat.row.header.final.PDTX tmp1 > final.pasted.G4.median.cpm.PDTX && rm tmp1
+
+
+#Compare G4.intensity of promoters in highly AMP or GAIN or Neut or HETD and expressed genes for single PDTX models using all data points.
+
+Plot with Graphpad Prism
