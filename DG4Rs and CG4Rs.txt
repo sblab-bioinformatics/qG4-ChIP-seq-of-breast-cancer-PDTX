@@ -1,0 +1,708 @@
+DG4Rs and CG4Rs. Differential G4-binding analysis was employed to establish differentially enriched G4 regions (DG4Rs), essentially as recently described, 
+which is integrated into our normalisation workflow (see https://github.com/sblab-bioinformatics/qG4-ChIP-seq-of-breast-cancer-PDTX/). Briefly, all 
+high-confidence G4-ChIP-seq peak files obtained from 16 G4-ChIP-seq experiments were unified and merged into a single PDTX G4 DNA regional bed file 
+displaying ~19,000 G4 regions. Differential G4-binding analysis relies on edgeR and quantifies the spike-in and library size normalised sequencing read 
+coverage within G4 regions for each G4-ChIP-seq experiment, respectively. DG4Rs of a PDTX model are defined as G4 regions that contain more than log2 0.6 
+read coverage in one PDTX model relative to half or more, here 5 out of 11, PDTX models. Constant G4 regions (CG4Rs) are the remaining of ~19,000 G4 
+regions that are not DG4Rs.
+
+
+
+#Calculate coverage at peaks and normalisation factors
+#######################################################
+
+#Calculate coverage at BG4 enriched dm6 regions
+################################################
+
+#plotEnrichment to get scaling factors from dm6 data using fold ratio ChIP and ChIP over Input
+#######################################################
+
+for f in *.bam; do sbatch -o %j.$f.log --mem 16G -J index.$f --wrap "/home/bioinformatics/software/samtools/samtools-1.6/bin/samtools index -b $f"; done
+
+sbatch --mem 128G -o plotEnrichment.out -e plotEnrichment.err -J plotEnrichment --wrap "plotEnrichment -b *dm6.5M.bam --BED macs2_output/dm6.all_peaks.5M.bed -o plotEnrichment/for.dm6.norm.png --variableScales --outRawCounts for.dm6.norm.txt"
+
+Take % reads and calculate normalisation factors
+
+PDTX.bam.file	%.total.dm6.read.coverage	Dm6.normalisation.factors.(total)	%.dm6.read.coverage.in.BG4.enriched.regions	Dm6.normalisation.factors.(BG4.enriched dm6 regions)
+139M_181_R1.all.dm6.merged.nodup.bam	15.98%	 1.42 	5.92	1.43
+139M_181_R2.all.dm6.merged.nodup.bam	12.87%	 1.76 	6.26	1.35
+139M_181_R3.all.dm6.merged.nodup.bam	9.71%	 2.33 	6.04	1.40
+139M_181_R4.all.dm6.merged.nodup.bam	11.06%	 2.05 	6.88	1.23
+139M_284_R1.all.dm6.merged.nodup.bam	12.12%	 1.87 	7.55	1.12
+139M_284_R2.all.dm6.merged.nodup.bam	13.25%	 1.71 	6.98	1.21
+139M_284_R3.all.dm6.merged.nodup.bam	13.18%	 1.72 	8.25	1.03
+139M_284_R4.all.dm6.merged.nodup.bam	13.79%	 1.64 	7.27	1.17
+143_284_R1.all.dm6.merged.nodup.bam	14.91%	 1.52 	6.94	1.22
+143_284_R2.all.dm6.merged.nodup.bam	17.16%	 1.32 	6.7	1.26
+143_284_R3.all.dm6.merged.nodup.bam	15.05%	 1.50 	6.53	1.30
+143_284_R4.all.dm6.merged.nodup.bam	14.82%	 1.53 	6.54	1.30
+179_181_R1.all.dm6.merged.nodup.bam	13.70%	 1.65 	5.3	1.60
+179_181_R2.all.dm6.merged.nodup.bam	11.01%	 2.06 	5.35	1.58
+179_181_R3.all.dm6.merged.nodup.bam	11.08%	 2.04 	4.42	1.92
+179_181_R4.all.dm6.merged.nodup.bam	14.19%	 1.60 	5.12	1.65
+179_284_R1.all.dm6.merged.nodup.bam	13.98%	 1.62 	5.45	1.55
+179_284_R2.all.dm6.merged.nodup.bam	17.52%	 1.29 	5.04	1.68
+179_284_R3.all.dm6.merged.nodup.bam	17.60%	 1.29 	4.72	1.79
+179_284_R4.all.dm6.merged.nodup.bam	18.40%	 1.23 	4.89	1.73
+201_181_R1.all.dm6.merged.nodup.bam	13.17%	 1.72 	6.74	1.26
+201_181_R2.all.dm6.merged.nodup.bam	12.64%	 1.79 	6.99	1.21
+201_181_R3.all.dm6.merged.nodup.bam	13.57%	 1.67 	5.74	1.48
+201_181_R4.all.dm6.merged.nodup.bam	11.94%	 1.90 	6.24	1.36
+201_284_R1.all.dm6.merged.nodup.bam	18.77%	 1.21 	5.4	1.57
+201_284_R2.all.dm6.merged.nodup.bam	16.68%	 1.36 	3	2.82
+201_284_R3.all.dm6.merged.nodup.bam	18.15%	 1.25 	4.06	2.09
+201_284_R4.all.dm6.merged.nodup.bam	22.65%	 1.00 	5.18	1.64
+316_284_R1.all.dm6.merged.nodup.bam	11.79%	 1.92 	6.97	1.22
+316_284_R2.all.dm6.merged.nodup.bam	11.02%	 2.06 	6.94	1.22
+316_284_R3.all.dm6.merged.nodup.bam	14.15%	 1.60 	6.2	1.37
+316_284_R4.all.dm6.merged.nodup.bam	19.10%	 1.19 	5.11	1.66
+331_284_R1.all.dm6.merged.nodup.bam	10.10%	 2.24 	6.9	1.23
+331_284_R2.all.dm6.merged.nodup.bam	10.76%	 2.11 	6.04	1.40
+331_284_R3.all.dm6.merged.nodup.bam	10.51%	 2.16 	6.28	1.35
+331_284_R4.all.dm6.merged.nodup.bam	10.27%	 2.21 	6.41	1.32
+521_284_R1.all.dm6.merged.nodup.bam	9.78%	 2.32 	7.36	1.15
+521_284_R2.all.dm6.merged.nodup.bam	11.22%	 2.02 	8.47	1.00
+521_284_R3.all.dm6.merged.nodup.bam	13.07%	 1.73 	7.63	1.11
+521_284_R4.all.dm6.merged.nodup.bam	19.15%	 1.18 	6.19	1.37
+98_181_R1.all.dm6.merged.nodup.bam	14.98%	 1.51 	6.22	1.36
+98_181_R2.all.dm6.merged.nodup.bam	19.22%	 1.18 	5.79	1.46
+98_181_R3.all.dm6.merged.nodup.bam	17.41%	 1.30 	6.26	1.35
+98_181_R4.all.dm6.merged.nodup.bam	16.38%	 1.38 	5.95	1.42
+98_284_R1.all.dm6.merged.nodup.bam	14.89%	 1.52 	4.97	1.70
+98_284_R2.all.dm6.merged.nodup.bam	14.27%	 1.59 	4.96	1.71
+98_284_R3.all.dm6.merged.nodup.bam	13.87%	 1.63 	5.23	1.62
+98_284_R4.all.dm6.merged.nodup.bam	15.76%	 1.44 	5.18	1.64
+5_317_R1.dm6.merged.nodup.bam	18.59%	 1.22 	4.73	1.79
+5_317_R2.dm6.merged.nodup.bam	18.98%	 1.19 	4.84	1.75
+5_317_R3.dm6.merged.nodup.bam	17.38%	 1.30 	5.58	1.52
+5_317_R4.dm6.merged.nodup.bam	16.20%	 1.40 	5.38	1.57
+9_317_R1.dm6.merged.nodup.bam	11.45%	 1.98 	5.51	1.54
+9_317_R2.dm6.merged.nodup.bam	18.54%	 1.22 	5.95	1.42
+9_317_R3.dm6.merged.nodup.bam	20.20%	 1.12 	6.08	1.39
+9_317_R4.dm6.merged.nodup.bam	21.55%	 1.05 	5.98	1.42
+143_317_R1.dm6.merged.nodup.bam	14.82%	 1.53 	5.46	1.55
+143_317_R2.dm6.merged.nodup.bam	15.46%	 1.47 	5.41	1.57
+143_317_R3.dm6.merged.nodup.bam	16.52%	 1.37 	6.08	1.39
+143_317_R4.dm6.merged.nodup.bam	14.98%	 1.51 	5.89	1.44
+863_317_R1.dm6.merged.nodup.bam	15.18%	 1.49 	4.87	1.74
+863_317_R2.dm6.merged.nodup.bam	16.66%	 1.36 	5.42	1.56
+863_317_R3.dm6.merged.nodup.bam	17.39%	 1.30 	5.38	1.57
+863_317_R4.dm6.merged.nodup.bam	18.30%	 1.24 	4.71	1.80
+
+
+
+#Create 5 input files for differential binding analysis
+# 1) 3x tab sep. Normalisation factor files, a) control (dm6_norm0), b) total dm6 read recovery (dm6_norm4) and c) BG4 enriched dm6 normalisation (dm6_norm5.txt)
+# 2) 1x tab sep. Sample information file, containing sample name, replicate classification and read depth information.
+# 3) 1x Unified coverage (bedgraph) file in high-confidence PDTX hg19 G4 DNA regional bed file (hg19.all_peaks.25M.over99nt.sort.bed --> for details see 
+file https://github.com/sblab-bioinformatics/qG4-ChIP-seq-of-breast-cancer-PDTX/"Mapping, peak calling and peak processing") displaying ~19,000 G4 regions.
+##################################################################################################################################################################
+
+#Control = no normalisation = 1 --> dm6_norm0.txt
+#############################################################################
+1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1
+
+#Total dm6 read recovery --> dm6_norm4.txt
+#############################################################################
+1	1.417621791	1.759466722	2.332050003	2.048611313	1	1.869120199	1.70942792	1.719133418	1.642774771	1	1.519606663	1.319928533	1.504974782	1.528284378	1	1.527965087	1.465227749	1.371014581	1.511703854	1	1.652825714	2.056591138	2.04363643	1.595886297	1	1.619780731	1.293016683	1.286942911	1.231055032	1	1.719299944	1.792245173	1.669100369	1.897336435	1	1.206978992	1.358131528	1.247908575	1	1	1.920749707	2.055582041	1.600596504	1.185836726	1	2.241971147	2.105103483	2.155278288	2.206169365	1	2.316689854	2.018062672	1.733082788	1.182943868	1	1.218227039	1.193349986	1.303251325	1.398099906	1	1.492231022	1.3593576	1.302744782	1.237964872	1	1.978418817	1.221868082	1.121110498	1.051022763	1	1.512233951	1.178657722	1.301153003	1.383225947	1	1.521267885	1.587584164	1.63334745	1.437283658
+
+#BG4 enriched dm6 normalisation --> dm6_norm5.txt
+#############################################################################
+1	1.430743243	1.353035144	1.402317881	1.231104651	1	1.121854305	1.213467049	1.026666667	1.165061898	1	1.220461095	1.264179104	1.297090352	1.295107034	1	1.551282051	1.565619224	1.393092105	1.43803056	1	1.598113208	1.58317757	1.916289593	1.654296875	1	1.55412844	1.680555556	1.794491525	1.732106339	1	1.256676558	1.211731044	1.475609756	1.357371795	1	1.568518519	2.823333333	2.086206897	1.635135135	1	1.215208034	1.220461095	1.366129032	1.657534247	1	1.227536232	1.402317881	1.348726115	1.321372855	1	1.150815217	1	1.110091743	1.368336026	1	1.790697674	1.75	1.517921147	1.574349442	1	1.739219713	1.562730627	1.574349442	1.798301486	1	1.537205082	1.423529412	1.393092105	1.41638796	1	1.361736334	1.462867012	1.353035144	1.423529412	1	1.704225352	1.70766129	1.619502868	1.635135135
+
+
+#Sample information file --> sample_file.txt
+############################################
+#Row #1: all sample names, with replicates having same name (see file output below)
+#Row #2: all biological samples, with same condition having same name (see file output below)
+#Row #3: library size computed on the clean bam files (samtools view –c; see file output below)
+#Row #4: used to filter out files, if 1 library is removed (also all sample names from Row #1 containing the word "input" are removed)
+#Row #5: used for CNV connection, input file associated with each sample (must be one of the samples in sample names at Row #1)
+######################################################################################################################################
+139M_181_input	139M_181	139M_181	139M_181	139M_181	139M_284_input	139M_284	139M_284	139M_284	139M_284	143_284_input	143_284	143_284	143_284	143_284	143_317_input	143_317	143_317	143_317	143_317	179_181_input	179_181	179_181	179_181	179_181	179_284_input	179_284	179_284	179_284	179_284	201_181_input	201_181	201_181	201_181	201_181	201_284_input	201_284	201_284	201_284	201_284	316_284_input	316_284	316_284	316_284	316_284	331_284_input	331_284	331_284	331_284	331_284	521_284_input	521_284	521_284	521_284	521_284	5_317_input	5_317	5_317	5_317	5_317	863_317_input	863_317	863_317	863_317	863_317	9_317_input	9_317	9_317	9_317	9_317	98_181_input	98_181	98_181	98_181	98_181	98_284_input	98_284	98_284	98_284	98_284
+139M	139M	139M	139M	139M	139M	139M	139M	139M	139M	143	143	143	143	143	143	143	143	143	143	179	179	179	179	179	179	179	179	179	179	201	201	201	201	201	201	201	201	201	201	316	316	316	316	316	331	331	331	331	331	521	521	521	521	521	5	5	5	5	5	863	863	863	863	863	9	9	9	9	9	98	98	98	98	98	98	98	98	98	98
+25006362	27443217	31358337	39080078	24691509	25003002	32962320	32443449	25452096	37006436	25859080	33453994	26873700	35732958	32032688	26694528	23936886	24610958	21993358	27415610	25019516	31649450	31020857	24123812	37383126	24991509	21876359	23180076	25015554	27795007	25000256	27119284	25775077	32944919	25857834	24974712	22814120	37832859	44961326	24294786	17668097	26043711	25390560	21077766	23342246	24989140	27820088	70652355	25443827	36761975	24990642	40946331	30017554	37255793	31470602	24241661	23635188	23184789	26409968	17056054	22857946	19151248	23609357	22596964	22175522	24550930	28193803	23782331	21847680	21502854	25003378	20266246	26717856	26684197	18958716	22630798	23854422	28240550	22347769	21509353
+0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0
+139M_181_input	139M_181_input	139M_181_input	139M_181_input	139M_181_input	139M_284_input	139M_284_input	139M_284_input	139M_284_input	139M_284_input	143_284_input	143_284_input	143_284_input	143_284_input	143_284_input	143_317_input	143_317_input	143_317_input	143_317_input	143_317_input	179_181_input	179_181_input	179_181_input	179_181_input	179_181_input	179_284_input	179_284_input	179_284_input	179_284_input	179_284_input	201_181_input	201_181_input	201_181_input	201_181_input	201_181_input	201_284_input	201_284_input	201_284_input	201_284_input	201_284_input	316_284_input	316_284_input	316_284_input	316_284_input	316_284_input	331_284_input	331_284_input	331_284_input	331_284_input	331_284_input	521_284_input	521_284_input	521_284_input	521_284_input	521_284_input	5_317_input	5_317_input	5_317_input	5_317_input	5_317_input	863_317_input	863_317_input	863_317_input	863_317_input	863_317_input	9_317_input	9_317_input	9_317_input	9_317_input	9_317_input	98_181_input	98_181_input	98_181_input	98_181_input	98_181_input	98_284_input	98_284_input	98_284_input	98_284_input	98_284_input
+
+
+
+#3) 1x Unified coverage (bedgraph) file in high-confidence PDTX hg19 G4 DNA regional bed file (hg19.all_peaks.25M.over99nt.sort.bed)
+######################################################################################################################################
+
+for f in *hg19.merged.nodup*.bam
+do
+  f2=${f%%.bam}.25M.bam
+  if [ -f $f2 ];
+    then
+        echo "File $f2 exists";
+        sbatch --mem 128G -o $f.out -e $f.err -J coverage --wrap "coverageBed -a macs2_output/hg19.all_peaks.25M.over99nt.sort.bed -b $f2 -counts > hg19.all_peaks.25M.over99nt.sort.${f2%%.hg19.merged.nodup.25M.bam}.25M.bedgraph"
+    else
+        echo "File $f2 not found";
+        sbatch --mem 128G -o $f.out -e $f.err -J coverage --wrap "coverageBed -a macs2_output/hg19.all_peaks.25M.over99nt.sort.bed -b $f -counts > hg19.all_peaks.25M.over99nt.sort.${f%%.hg19.merged.nodup.bam}.25M.bedgraph"
+  fi
+done
+
+paste *25M.bedgraph | cut -f 1,2,3,4,8,12,16,20,24,28,32,36,40,44,48,52,56,60,64,68,72,76,80,84,88,92,96,100,104,108,112,116,120,124,128,132,136,140,144,148,152,156,160,164,168,172,176,180,184,188,192,196,200,204,208,212,216,220,224,228,232,236,240,244,248,252,256,260,264,268,272,276,280,284,288,292,296,300,304,308,312,316,320 > hg19.all_peaks.all.25M.bedgraph
+
+
+
+#Perform DBA analysis with 3x input files 1) combined coverage file (hg19.all_peaks.all.25M.bedgraph), 2) sample_file.txt, 
+#3) using either dm6_norm0.txt, dm6_norm4.txt or dm6_norm5.txt  
+##########################################################################################################################
+
+#R script using normalisation factors from BG4 enriched dm6 regions --> "dm6_norm5.txt"
+base_dir <- '/path/directory'
+setwd(base_dir)
+output_dir_name <- '<any.name/>'
+
+library(gplots)
+library(limma)
+library(edgeR)
+library(dendextend)
+library(plyr)
+
+# ====================
+# == INPUT FILES =====
+# ====================
+# tab-separated file containing read coverage in unified high-confidence peaks
+peak_file_counts_name <- 'hg19.all_peaks.all.25M.bedgraph'
+
+# tab-separated file containing sample information see sample_info_example.txt
+sample_file_name <- 'sample_file.txt'
+# tab-separated file containing the normalization factor for each sample (only one row): norm_example.txt
+norm_file <- 'dm6_norm5.txt'
+
+# ==============================
+# ===== CONTROL PARAMETERS =====
+# ==============================
+# 1 = yes, 0 = no
+log_file_name <- paste(gsub('\\/','',output_dir_name),'.log',sep='')
+do_subtract_input <- 1
+prefix <- output_dir_name
+save_plots <- 1
+save_tables <- 1
+save_norm_summary_files <- 1
+system(paste('mkdir ',prefix,sep=''))
+hacking <- 0
+
+# ====== Load input files ======
+peaks <- read.table(peak_file_counts_name,stringsAsFactors = F,header=F,sep='\t')
+sample_file <- read.table(sample_file_name,stringsAsFactors = F,header=F,sep='\t')
+norm_factor <- as.numeric(read.table(norm_file,stringsAsFactors = F,header=F,sep='\t')[1,])
+
+samples <- as.character(sample_file[1,])
+group <- as.character(sample_file[2,])
+libSize <- as.numeric(sample_file[3,])
+y <- peaks[,-c(1,2,3)]
+coords <- peaks[,c(1,2,3)]
+names(y) <-samples
+row.names(y) <- paste(peaks[,1],peaks[,2],peaks[,3],sep='_')
+y_orig <- y
+row_inds <- rep(-1,0)
+
+sink(log_file_name)
+print('subtract input log:')
+if (do_subtract_input && dim(sample_file)[1] >= 5)
+{
+  tmp1 <- peaks[,c(4:(4+dim(sample_file)[2]-1))]
+  colnames(tmp1) <- samples
+  # do rpm for all
+  for (i in 1:dim(tmp1)[2]) {
+    tmp1[,i] <- tmp1[,i] / (libSize[i] / 1000000)
+  }
+  # do respective input subtraction for all (in the RPM domain)
+  tmp2 <- tmp1
+  for (i in 1:dim(tmp2)[2]) {
+    col_ind <- grep(sample_file[5,i],colnames(tmp1))
+    #tmp2[,i] <- tmp1[,i] - tmp1[,col_ind]
+    tmp2[,i] <- pmax(0,tmp1[,i] - tmp1[,col_ind])
+  }  
+  # do reverse rpm for all and go back to original counts
+  for (i in 1:dim(tmp2)[2]) {
+    y[,i] <- tmp2[,i] * (libSize[i] / 1000000)
+  }
+} else {
+  print("Input subtraction not performed!")
+}
+
+# filter out selected samples and inputs
+inds <- rep(-1,0)
+if (dim(sample_file)[1] >= 4)
+  inds <- c(inds,which(sample_file[4,] == 1))
+inds <- c(inds,grep('input',samples))
+
+print(paste('files removed: ',paste(samples[inds],collapse=', '),sep=''))
+sink()
+
+
+if (length(row_inds) > 0)
+{
+  y <- y[-row_inds,]
+  y_orig <- y_orig[-row_inds,]
+  coords <- coords[-row_inds,]
+}
+if (length(inds) > 0)
+{
+  y <- y[,-inds]
+  y_orig <- y_orig[,-inds]
+}
+
+samples <- samples[-inds]
+group <- group[-inds]
+norm_factor <- norm_factor[-inds]
+libSize <- libSize[-inds]
+
+rep_names <- samples
+atable <- table(samples)
+count <- rep(0,length(atable))
+for (i in 1:length(group))
+{
+  den <- atable[which(names(atable) == samples[i])]
+  num <- count[which(names(atable) == samples[i])]
+  suf <- 1+(i+(den-1))%%den
+  count[which(names(atable) == samples[i])] <- num + 1
+  rep_names[i] <- paste(samples[i],".",suf,sep="")
+}
+colnames(y) <- rep_names
+
+
+
+# y2 = raw data with cpm (will be used for distance matrix analysis)
+y2 <- y_orig
+for (i in 1:dim(y2)[2])
+{
+  y2[,i] <- y_orig[,i] / (libSize[i] / 1000000)
+}
+dist_euc_no_cpm <- as.matrix(dist(t(y2)))
+
+# Optional --> hacking #1: raw data after input subtraction, to see if any improvement due to dm6
+# plots and improvement factor (IF) calculation  will be after input (y2) and after input+dm6 (y3)
+if (hacking == 1)
+{
+  y2 <- y 
+  for (i in 1:dim(y2)[2])
+  {
+    y2[,i] <- y[,i] / (libSize[i] / 1000000)
+  }
+  dist_euc_no_cpm <- as.matrix(dist(t(y2)))
+}
+
+# y3 = raw data with cpm and normalization (can be input_sub+dm6 or dm6 only) (will be used for distance matrix analysis)
+y3 <- y
+for (i in 1:dim(y3)[2])
+{
+  y3[,i] <- y[,i] / (libSize[i] / 1000000)
+  y3[,i] <- y3[,i] * norm_factor[i]
+}
+dist_euc_tot_cpm <- as.matrix(dist(t(y3)))
+
+# Optional --> hacking #2: 
+# raw data after input subtraction (y3),  and raw data absolute (y2) 
+# to see if any improvement from raw (y2) due to input subtraction (y3)
+# plots and IF will be raw and after input only
+if (hacking == 2)
+{
+  y3 <- y
+  for (i in 1:dim(y3)[2])
+  {
+    y3[,i] <- y[,i] / (libSize[i] / 1000000)
+  }
+  dist_euc_tot_cpm <- as.matrix(dist(t(y3)))
+}
+
+
+# y1 = raw data no cpm with normalization (can be input_sub+dm6 or dm6 only) (will be used for dba analysis)
+y1 <- y
+for (i in 1:dim(y1)[2])
+{
+  y1[,i] <- y[,i] * norm_factor[i]
+}
+
+# y = raw data no cpm without normalization (can be input_sub or nothing) (will be used for dba analysis)
+
+
+if (save_plots) {
+  # hierarchical clustering
+  pdf(paste(prefix,'hclust.norm.pdf',sep=''),12,12)
+  par(mfrow=c(2,1))
+  hc <- hclust(dist(t(y2)))
+  dend <- as.dendrogram(hc)
+  colorCodes <- c(rep('firebrick1',8),rep('green',8), rep('red',8), rep('cornflowerblue',8), rep('orange',4),rep('darkgreen',4),rep('blue',4), rep('darkgrey',4),rep('black',4), rep('purple',4), rep('turquoise3',8))
+  labels_colors(dend) <- colorCodes[order.dendrogram(dend)]
+  plot(dend,main='no normalization, cpm')
+  hc <- hclust(dist(t(y3)))
+  dend <- as.dendrogram(hc)
+  colorCodes <- c(rep('firebrick1',8),rep('green',8), rep('red',8), rep('cornflowerblue',8), rep('orange',4),rep('darkgreen',4),rep('blue',4), rep('darkgrey',4),rep('black',4), rep('purple',4), rep('turquoise3',8))
+  labels_colors(dend) <- colorCodes[order.dendrogram(dend)]
+  plot(dend,main='dm6 normalization, cpm')
+  dev.off()
+  
+  
+# see difference between cpm normalization and full normalization distance matrices
+amax <- max(dist_euc_tot_cpm)
+# crucial: divide matrix by maximal distance
+tmp1 <- (dist_euc_tot_cpm / amax)
+amax <- max(dist_euc_no_cpm)
+tmp2 <- (dist_euc_no_cpm / amax)
+tmp12 <- tmp1 / tmp2
+# values along the diagonal will have 0 distance, so the ratio is not a number and we put it to 1 (i.e. unchanged)
+tmp12[which(is.na(tmp12))] <- 1
+# crucial: scaling factor for color coding
+s <- max(max(log2(tmp12)),abs(min(log2(tmp12))))
+
+if (save_plots) {
+  # plot normalized distance matrix as heatmap
+  pdf(paste(prefix,'heatmap.cpm_vs_norm','.pdf',sep=''),6,6)
+  par(mfrow=c(1,1))
+  heatmap.2(log2(tmp12),Rowv = F, Colv = F, dendrogram = 'none', trace = 'none',cexRow = 0.7,cexCol = 0.7,breaks=seq(-s,s,length.out = 101),col=redgreen(100))
+  dev.off()
+}
+
+# calculate improvement factors and mean improvement for biological and technical reproducibility
+unique_r = unique(group)
+table_r = rbind(label=unique_r, count=sapply(unique_r,function(x)sum(group==x)))
+inds_counts <- as.numeric(table_r[2,])
+count <- 1;
+inds_list <- vector("list", length(inds_counts))
+belong <- rep(-1,0)
+for (i in 1:length(inds_counts))
+{
+  aind <- count:(count+inds_counts[i]-1)
+  inds_list[[i]] <- aind
+  count <- count + length(aind)
+  belong <- c(belong,rep(i,length(aind)))
+}
+
+sum_diag <- 0
+sum_out_diag <- 0
+improvement_cpm_biol_all <- rep(NA,length(inds_list))
+
+for (l in 1:length(inds_list))
+{
+  a_mat <- log2(tmp12)[inds_list[[l]],inds_list[[l]]]
+  a_mat <- a_mat[upper.tri(a_mat,diag = F)]
+  improvement_cpm_biol_all[l] <- sum(log2(tmp12)[1,-inds_list[[l]]]) / (length(belong)-length(inds_list[[l]])) - sum(a_mat) / length(a_mat)
+  sum_diag <- sum_diag + sum(a_mat) / length(a_mat)
+  sum_out_diag <- sum_out_diag + sum(log2(tmp12)[1,-inds_list[[l]]]) / (length(belong)-length(inds_list[[l]]))
+}
+
+improvement_cpm_biol <- sum_out_diag - sum_diag # save number
+if (save_norm_summary_files)
+  write.table(improvement_cpm_biol_all,paste(prefix,'improvement_cpm_biol_all.txt',sep=''),col.names=F,row.names=F,quote=F,sep='\t')
+
+improvement_cpm_biol_pairs <- rep(NA,length(inds_list))
+for (i in 1:length(inds_list))
+{
+  tmp <- rep(NA,length(inds_list)-1)
+  my_inds <- inds_list[[i]]
+  a_mat <- log2(tmp12)[my_inds,my_inds]
+  a_mat <- a_mat[upper.tri(a_mat,diag = F)]
+  sum_diag <- sum(a_mat) / length(a_mat)
+  all_other <- inds_list[-belong[i]]
+  for (k in seq(1,length(all_other))){
+    a_mat <- log2(tmp12)[my_inds,all_other[[k]]]
+    sum_out_diag <- sum(a_mat) / (length(a_mat))
+    tmp[k] <- sum_out_diag - sum_diag
+  }
+  improvement_cpm_biol_pairs[i] <- mean(tmp)
+}
+if (save_norm_summary_files)
+  write.table(improvement_cpm_biol_pairs,paste(prefix,'improvement_cpm_pairs.biol.txt',sep=''),col.names=F,row.names=F,quote=F,sep='\t')
+improvement_cpm_biol_pairs_avg <- mean(improvement_cpm_biol_pairs)  # save number
+
+
+unique_r = unique(samples)
+table_r = rbind(label=unique_r, count=sapply(unique_r,function(x)sum(samples==x)))
+inds_counts <- as.numeric(table_r[2,])
+count <- 1;
+inds_list <- vector("list", length(inds_counts))
+belong <- rep(-1,0)
+for (i in 1:length(inds_counts))
+{
+  aind <- count:(count+inds_counts[i]-1)
+  inds_list[[i]] <- aind
+  count <- count + length(aind)
+  belong <- c(belong,rep(i,length(aind)))
+}
+
+sum_diag <- 0
+sum_out_diag <- 0
+improvement_cpm_tech_all <- rep(NA,length(inds_list))
+for (l in 1:length(inds_list))
+{
+  a_mat <- log2(tmp12)[inds_list[[l]],inds_list[[l]]]
+  a_mat <- a_mat[upper.tri(a_mat,diag = F)]
+  improvement_cpm_tech_all[l] <- sum(log2(tmp12)[1,-inds_list[[l]]]) / (length(belong)-length(inds_list[[l]])) - sum(a_mat) / length(a_mat)
+  sum_diag <- sum_diag + sum(a_mat) / length(a_mat)
+  sum_out_diag <- sum_out_diag + sum(log2(tmp12)[1,-inds_list[[l]]]) / (length(belong)-length(inds_list[[l]]))
+}
+improvement_cpm_tech <- sum_out_diag - sum_diag  # save number
+if (save_norm_summary_files)
+  write.table(improvement_cpm_tech_all,paste(prefix,'improvement_cpm_tech_all.txt',sep=''),col.names=F,row.names=F,quote=F,sep='\t')
+
+improvement_cpm_tech_pairs <- rep(NA,length(inds_list))
+for (i in 1:length(inds_list))
+{
+  tmp <- rep(NA,length(inds_list)-1)
+  my_inds <- inds_list[[i]]
+  a_mat <- log2(tmp12)[my_inds,my_inds]
+  a_mat <- a_mat[upper.tri(a_mat,diag = F)]
+  sum_diag <- sum(a_mat) / length(a_mat)
+  all_other <- inds_list[-belong[i]]
+  for (k in seq(1,length(all_other))){
+    a_mat <- log2(tmp12)[my_inds,all_other[[k]]]
+    sum_out_diag <- sum(a_mat) / (length(a_mat))
+    tmp[k] <- sum_out_diag - sum_diag
+  }
+  improvement_cpm_tech_pairs[i] <- mean(tmp)
+}
+if (save_norm_summary_files)
+  write.table(improvement_cpm_tech_pairs,paste(prefix,'improvement_cpm_pairs.tech.txt',sep=''),col.names=F,row.names=F,quote=F,sep='\t')
+improvement_cpm_tech_pairs_avg <- mean(improvement_cpm_tech_pairs)  # save number
+
+sink(paste(prefix,'improvement_factor_all.average','.txt',sep=''),append = T)
+print(paste('improvement factor biological replicates = ', improvement_cpm_biol,sep=''))
+print(paste('improvement factor biological replicates by pairs = ', improvement_cpm_biol_pairs_avg,sep=''))
+print(paste('improvement factor technical replicates = ', improvement_cpm_tech,sep=''))
+print(paste('improvement factor technical replicates by pairs = ', improvement_cpm_tech_pairs_avg,sep=''))
+sink()
+
+if (save_tables) {
+  colnames(y_orig) <- colnames(y)
+  write.table(format(cbind(coords,y_orig),digits=3),paste(prefix,'peak_counts.original_filtered.tab',sep=''),col.names=c('chr','start','end',colnames(y_orig)),row.names=F,sep='\t',quote=F)
+  write.table(format(cbind(coords,y2),digits=3),paste(prefix,'peak_counts.cpm_filtered.tab',sep=''),col.names=c('chr','start','end',colnames(y2)),row.names=F,sep='\t',quote=F)
+  write.table(format(cbind(coords,y3),digits=3),paste(prefix,'peak_counts.cpm_norm_filtered.tab',sep=''),col.names=c('chr','start','end',colnames(y3)),row.names=F,sep='\t',quote=F)
+  write.table(format(cbind(coords,y1),digits=3),paste(prefix,'peak_counts.norm_filtered.tab',sep=''),col.names=c('chr','start','end',colnames(y1)),row.names=F,sep='\t',quote=F)
+}
+
+# CAREFUL: output_dir_name and base_dir DEFINED IN above R script
+adir <- paste(base_dir,output_dir_name,sep='')
+setwd(adir)
+log_file_name <- paste(gsub('\\/$','',adir),'.log',sep='')
+
+library(gplots)
+library(edgeR)
+library(dendextend)
+library(RColorBrewer)
+
+# ====================
+# == INPUT FILES =====
+# ====================
+# tab-separated file file containing peak file and read counts in each peak
+processed_peak_file_counts_name <- paste(adir,'peak_counts.norm_filtered.tab',sep='')
+# tab-separated file containing sample information
+sample_file_name <- '../sample_file.txt'
+
+output_prefix <- paste(tools::file_path_sans_ext(processed_peak_file_counts_name),'.detable',sep='')
+
+# ==============================
+# ===== CONTROL PARAMETERS =====
+# ==============================
+save_plots <- 1
+save_tables <- 1 
+th <- 0.01
+FC <- 0.6
+de_type <- 0 # 0: split; 1: merged; 2:batch
+
+# ====== Load input files ======
+peaks <- read.table(processed_peak_file_counts_name,stringsAsFactors = F,header=T,sep='\t')
+colnames(peaks) <- gsub('^X','',colnames(peaks))
+sample_file <- read.table(sample_file_name,stringsAsFactors = F,header=F,sep='\t')
+
+samples <- as.character(sample_file[1,])
+group <- as.character(sample_file[2,])
+libSize <- as.numeric(sample_file[3,])
+y <- peaks[,-c(1,2,3)]
+coords <- peaks[,c(1,2,3)]
+row.names(y) <- paste(peaks[,1],peaks[,2],peaks[,3],sep='_')
+
+# fix negatives to 0
+y[y<0] <- 0
+
+inds <- rep(-1,0)
+if (dim(sample_file)[1] >= 4)
+  inds <- c(inds,which(sample_file[4,] == 1))
+inds <- c(inds,grep('input',samples))
+sink(log_file_name,append = T)
+print('Input samples and file removed:')
+samples[sort(inds)]
+sink()
+
+samples <- samples[-inds]
+group <- group[-inds]
+libSize <- libSize[-inds]
+
+# ======== edgeR differential binding analysis ===========
+if (de_type == 0) {
+  # Combine all the experimental factors (tumour and date) into one combined factor (3.3.1 of edgeR user guide)
+  de<- DGEList(counts=y, group=samples,lib.size = libSize)
+  agroup <- as.character(samples)
+  design <- model.matrix(~0+agroup)
+  conds_b <- as.character(group[which(!duplicated(group))])
+  conds <- as.character(samples[which(!duplicated(samples))])
+}
+if (de_type == 1) {
+  # Combine all tumours in one factors (flatten date information)
+  de<- DGEList(counts=y, group=group,lib.size = libSize)
+  agroup <- as.character(group)
+  design <- model.matrix(~0+agroup)
+  conds_b <- as.character(group[which(!duplicated(group))])
+  conds <- conds_b
+}
+if (de_type == 2) {
+  # Model explicitely all the experimental factors (tumour and date) into a linear model (3.4.2 of edgeR user guide)
+  de<- calcNormFactors(de, method= 'none')
+  Tumour <- factor(group)
+  Batch <- factor(gsub('.*_','',samples))
+  design <- model.matrix(~0+Tumour+Batch)
+  conds_b <- as.character(group[which(!duplicated(group))])
+  conds <- conds_b
+}
+
+de<- estimateGLMCommonDisp(de, design)
+de<- estimateGLMTagwiseDisp(de, design)
+fit<- glmFit(de, design)
+
+colnames(design)[1:length(conds)] <- conds
+
+n<- length(unique(group))
+detables <- vector("list", n) 
+names(detables) <- conds_b
+
+peaks_up_down <- matrix(0, dim(y)[1],n)
+colnames(peaks_up_down) <- conds_b
+row.names(peaks_up_down) <- row.names(y)
+
+sink(log_file_name,append = T)
+for (i in 1:length(detables))
+{
+  print(conds_b[i])
+  mycond <- conds_b[i]
+  inds_yes <- grep(mycond,conds)
+  inds_no <- setdiff(seq(1:length(conds)),c(inds_yes))
+  print(paste('Currecnt condition being tested for dba: ',mycond,sep=''))
+  print(paste('Indexes belonging: ',paste(inds_yes,collapse=' '),sep=''))
+  conds[inds_yes]
+  print(paste('Indexes NOT belonging: ',paste(inds_no,collapse=' '),sep=''))
+  conds[inds_no]
+  contrasts <- rep(0,dim(design)[2])
+  contrasts[inds_yes] <- 1/length(inds_yes)
+  contrasts[inds_no] <- -1/length(inds_no)
+  print(paste('Contrast vector: ',paste(format(as.numeric(contrasts),digits=3),collapse=' '),sep=''))
+  lrt <- glmLRT(fit,contrast=contrasts)
+  detable<- topTags(lrt, n= nrow(y))$table
+  detable$ID <- rownames(detable)
+  up <- detable$ID[which(detable$logFC >= FC & detable$FDR <= th)]
+  down <- detable$ID[which(detable$logFC <= -FC & detable$FDR <= th)]
+  peaks_up_down[which(row.names(peaks_up_down) %in% up),i] <- 1
+  peaks_up_down[which(row.names(peaks_up_down) %in% down),i] <- -1
+  detables[[i]] <- detable
+}
+sink()
+
+if (save_tables)
+{
+  for (i in 1:length(detables))
+    write.table(detables[[i]],paste(output_prefix,'.',names(detables[i]),'_vs_all.tab',sep=''),col.names=colnames(detables[[i]]),row.names=F,sep='\t')
+  peaks_up_down_df <- as.data.frame(peaks_up_down,stringsAsFactors = F)
+  peaks_up_down_df$ID <- row.names(peaks_up_down_df)
+  write.table(peaks_up_down_df,paste(output_prefix,'.peaks_table_one_vs_all.tab',sep=''),col.names=colnames(peaks_up_down_df),row.names=F,sep='\t')
+  save(detables,peaks_up_down,file=paste(output_prefix,'.detables_one_vs_all.RData',sep=''))
+  # save also bed file for peak summary
+  peaks_up_down_df <- as.data.frame(cbind(peaks[,1:3],peaks_up_down),stringsAsFactors=F)
+  write.table(peaks_up_down_df,paste(output_prefix,'.peaks_table_one_vs_all.bed',sep=''),col.names=colnames(peaks_up_down_df),row.names=F,sep='\t')
+}
+
+pdf(paste(output_prefix,'.diff_peaks_n_barplot_nonorm.pdf',sep=''),12,6)
+par(mfrow=c(1,3))
+bars <- rep(0,n)
+for (i in 1:n)
+  bars[i] <- length(which(peaks_up_down[,i] == 1))
+barplot(bars,names=conds_b,las=2,ylab='# sepcific up-regulated peaks')
+bars2 <- rep(0,n)
+for (i in 1:n)
+  bars2[i] <- length(which(peaks_up_down[,i] == -1))
+barplot(bars2,names=conds_b,las=2,ylab='# sepcific downs-regulated peaks')
+barplot(rbind(bars,bars2),names=conds_b,las=2)
+legend(1,10000,c('up','down'),text.col = grey.colors(2),fill=grey.colors(2))
+dev.off()
+
+all <- (rowSums(abs(peaks_up_down)))
+table(all)
+inv <- row.names(peaks_up_down)[which(all == 0)]
+inv_means <- rowMeans(y[which(row.names(y) %in% inv),])
+noinv_means <- rowMeans(y[which(!row.names(y) %in% inv),])
+
+pdf(paste(output_prefix,'.invariant_boxplot_nonorm.pdf',sep=''),4,8)
+par(mfrow=c(2,1))
+boxplot(log2(inv_means),log2(noinv_means),outline=F,names=c('invariant','variant'),ylab='all tumors mean signal (log2)')
+boxplot((inv_means),(noinv_means),outline=F,names=c('invariant','variant'),ylab='all tumors mean signal')
+dev.off()
+
+system('gzip *.tab')
+system('gzip *.bed')
+
+# CAREFUL: output_dir_name and base_dir DEFINED IN PREVIOUS SCRIPT
+adir <- paste(base_dir,output_dir_name,sep='')
+setwd(adir)
+log_file_name <- paste(gsub('\\/$','',adir),'_plot.log',sep='')
+
+# ===================================
+# == INPUT FILES AND PARAMETERS =====
+# ===================================
+# tab-separated file file containing peak file and read counts in each peak
+processed_peak_file_counts_name <- 'peak_counts.norm_filtered.tab.gz'
+save_plots <- 1
+all_plots <- 1
+
+# ====== Load input files ======
+all_files <- list.files('./',pattern = 'detable.*tab.gz')
+inds_no <- grep('peaks_table',all_files)
+all_files <- all_files[-inds_no]
+peaks <- read.table(processed_peak_file_counts_name,stringsAsFactors = F,header=T,sep='\t')
+colnames(peaks) <- gsub('^X','',colnames(peaks))
+row.names(peaks) <- paste(peaks[,1],peaks[,2],peaks[,3],sep='_')
+
+if (all_plots)
+{
+  for (i in 1:length(all_files))
+  {
+    sink(log_file_name,append = T)
+    print(paste('Detable plot for ',all_files[i],sep=''))
+    sink()
+    detable <- read.table(all_files[i],stringsAsFactors = F,sep='\t',header=T)
+    pal<- colorRampPalette(c("white", "lightblue", "yellow", "red"), space = "Lab")
+    pdf(gsub('.tab.gz$','.pdf',all_files[i]), 6, 6, pointsize= 10)
+    par(las= 1, mgp= c(1.75, 0.5, 0), bty= 'l', mar= c(3, 3, 3, 0.5))
+    smoothScatter(x= detable$logCPM, y= detable$logFC, xlab= 'logCPM', ylab= 'logFC',
+                  main= paste(all_files[i],'\nDifferential binding'), colramp= pal, col= 'blue')
+    lines(loess.smooth(x= detable$logCPM, y= detable$logFC, span= 0.1), lwd= 2, col= 'grey60')
+    abline(h= 0, col= 'grey30')
+    points(x= detable$logCPM, y= detable$logFC, col= ifelse(detable$FDR < 0.05, '#FF000080', 'transparent'), cex= 0.5, pch= '.')
+    mtext(side= 3, line= -1.2, text= sprintf('FDR < 0.05: %s', nrow(detable[which(detable$FDR < 0.05 & detable$logFC > 0),])), adj= 1)
+    mtext(side= 1, line= -1.2, text= sprintf('FDR < 0.05: %s', nrow(detable[which(detable$FDR < 0.05 & detable$logFC < 0),])), adj= 1)
+    grid(col= 'grey50')
+    dev.off()
+  }
+}
+
+
+
+
+#DG4R extraction of from DBA detables of PDTX qG4-ChIP-seq data
+##################################################################
+
+for f in *_vs_all.tab.gz; do gzip -c -d $f | awk -F "\t" '{ if(($1 >= 0.6) && ($5 < 0.05)) { print } }' | awk -F "\t" '{print $6}' | sed 's/"//g' | sed 's/_/\t/g' | sort -k1,1 -k2,2n > ${f%%.tab.gz}_up.bed; done
+
+find . -type f -empty -delete
+
+#CG4R extraction
+################
+
+# calculate the # of common G4 regions (CG4Rs) across all models = Subtract all PDTX vs all.up regions from "hg19.all_peaks.25M.over99nt.sort.bed" 
+# used for DBA
+
+subtractBed -A -a hg19.all_peaks.25M.over99nt.sort.bed -b *_vs_all_up.bed | sort -k1,1 -k2,2 > common.PDTX.hg19.peaks.bed
+
+--> 876 common.PDTX.hg19.peaks.bed
