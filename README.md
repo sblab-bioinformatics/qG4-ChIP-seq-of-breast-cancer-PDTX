@@ -1,1 +1,1 @@
-# qG4-ChIP-seq-of-breast-cancer-PDTX
+Scripts are named according to method headings in Hänsel-Hertsch et al. 2019.
