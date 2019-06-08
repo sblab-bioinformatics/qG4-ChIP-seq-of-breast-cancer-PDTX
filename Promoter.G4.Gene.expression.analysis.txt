@@ -1,0 +1,35 @@
+Promoter - G4 - Gene expression analysis. Promoter transcription start site (TSS) coordinates, 1 kb (+/−) from TSS, were generated 
+for 22,483 genes using hg19. To reveal how G4 DNA is linked to gene expression, intervene pairwise was employed to quantify the fraction 
+of DG4Rs and CG4Rs that overlap either with lowly, medium or highly expressed PDTX promoters (Fig. 2b).
+
+#Gene expression data for the PDTX models HCI005, HCI009, VHIO098, STG139M, STG143, VHIO179, STG201, STG316, AB521M  
+#were obtained from Bruna et al. Cell 2016.
+########################################################################################################################
+
+#Sort gene expression information for all PDTX gene expression files into low, medium and highly expressed gene files.
+# --> PDTX_expression_low.txt PDTX_expression_mid.txt PDTX_expression_high.txt
+
+#Take promoter coordinate bed file (hg19.gene_name.promoters.bed) from Hansel-Hertsch et al. Nature Genetics 2016 and extract low 
+#(PDTX_expression_low.txt), medium (PDTX_expression_mid.txt) and highly expressed genes (PDTX_expression_high.txt) gene promoter (+/- 1kbp).
+###########################################################################################################################################
+
+for f in 5_expression_low.txt 5_expression_mid.txt 5_expression_high.txt 9_expression_low.txt 9_expression_mid.txt 9_expression_high.txt 98_expression_low.txt 98_expression_mid.txt 98_expression_high.txt 139M_expression_low.txt 139M_expression_mid.txt 139M_expression_high.txt 143_expression_low.txt 143_expression_mid.txt 143_expression_high.txt 179_expression_low.txt 179_expression_mid.txt 179_expression_high.txt 201_expression_low.txt 201_expression_mid.txt 201_expression_high.txt 316_expression_low.txt 316_expression_mid.txt 316_expression_high.txt 521M_expression_low.txt 521M_expression_mid.txt 521M_expression_high.txt; 
+do awk 'FNR==NR{a[$1];next}($4 in a){print}' $f hg19.gene_name.promoters.bed > ${f%%.txt}.TSS1kbp.plus.minus.bed; done
+
+
+#quantify fractional overlap between DG4Rs, CG4R and differentially expressed gene promoter using intervene pairwise
+#DG4Rs (AB521M_specific_G4.bed, AB863_specific_G4.bed, HCI005_specific_G4.bed, HCI009_specific_G4.bed, STG139M_specific_G4.bed, 
+STG143_specific_G4.bed, STG201_specific_G4.bed, STG316_specific_G4.bed, STG331_specific_G4.bed, VHIO098_specific_G4.bed, VHIO179_specific_G4.bed)
+#CG4Rs (common.PDTX.hg19.peaks.bed)
+
+nano intervene.fraction.sh
+
+#!/bin/sh
+#SBATCH --partition general
+#SBATCH --mem 128G
+#SBATCH --job-name interv     
+#SBATCH --output /path/fraction/frac.%j.out
+
+intervene pairwise --compute=frac --fontsize 3 -i common.PDTX.hg19.peaks.bed 139M_expression_high.TSS1kbp.plus.minus.bed 139M_expression_low.TSS1kbp.plus.minus.bed 139M_expression_mid.TSS1kbp.plus.minus.bed 143_expression_high.TSS1kbp.plus.minus.bed 143_expression_low.TSS1kbp.plus.minus.bed 143_expression_mid.TSS1kbp.plus.minus.bed 179_expression_high.TSS1kbp.plus.minus.bed 179_expression_low.TSS1kbp.plus.minus.bed 179_expression_mid.TSS1kbp.plus.minus.bed 201_expression_high.TSS1kbp.plus.minus.bed 201_expression_low.TSS1kbp.plus.minus.bed 201_expression_mid.TSS1kbp.plus.minus.bed 316_expression_high.TSS1kbp.plus.minus.bed 316_expression_low.TSS1kbp.plus.minus.bed 316_expression_mid.TSS1kbp.plus.minus.bed 521M_expression_high.TSS1kbp.plus.minus.bed 521M_expression_low.TSS1kbp.plus.minus.bed 521M_expression_mid.TSS1kbp.plus.minus.bed 5_expression_high.TSS1kbp.plus.minus.bed 5_expression_low.TSS1kbp.plus.minus.bed 5_expression_mid.TSS1kbp.plus.minus.bed 98_expression_high.TSS1kbp.plus.minus.bed 98_expression_low.TSS1kbp.plus.minus.bed 98_expression_mid.TSS1kbp.plus.minus.bed 9_expression_high.TSS1kbp.plus.minus.bed 9_expression_low.TSS1kbp.plus.minus.bed 9_expression_mid.TSS1kbp.plus.minus.bed AB521M_specific_G4.bed AB863_specific_G4.bed HCI005_specific_G4.bed HCI009_specific_G4.bed STG139M_specific_G4.bed STG143_specific_G4.bed STG201_specific_G4.bed STG316_specific_G4.bed STG331_specific_G4.bed VHIO098_specific_G4.bed VHIO179_specific_G4.bed -o /path/fraction/
+
+sbatch intervene.fraction.sh
