@@ -1,0 +1,41 @@
+DG4R.CG4R - Association - Upregulated genes determining integrative cluster signature. 
+Promoter coordinates of significantly (Adjusted p-value < 0.05; fold change > log2 0.6) upregulated genes 
+of integrative cluster 1-10 were retrieved from Curtis et al Nature 2012. DG4Rs or CG4Rs were associated with the 
+upregulated IC promoters using intervene pairwise and the bedtools fisher option.
+#######################################################################################################################################
+
+Check association of DG4Rs and CG4Rs with differentially upregulated expressed genes of the 10 integrative clusters (ICs) (Curtis et al. Nature 2012).
+
+1) Isolate genes that are differentially expressed for all ICs.
+2) Promoters need to be captured for differentially expressed genes (Galaxy used)
+3) Use intervene pairwise to measure fisher-test
+
+
+1) 
+With following condition	c3>=0.6 and c7<=0.05	
+Number of header lines to skip	1	
+Inheritance Chain
+Filter on data 10
+Command Line
+python '/mnt/galaxy/galaxy-app/tools/stats/filtering.py' /mnt/galaxy/files/000/514/dataset_514235.dat /mnt/galaxy/files/000/514/dataset_514240.dat '/mnt/galaxy/tmp/job_working_directory/000/317/317922/tmpg80FWf' 11 "int,str,float,float,float,float,float,float,str,str,str" 1
+Dataset peek
+ID	logFC	AveExpr	t	P.Value	adj.P.Val	B	SYMBOL	PROBEQUALITY	CODINGZONE
+1	ILMN_1660844	2.05891359846599	8.06931597922067	39.1988689411683	5.16183578188179e-249	1.77371001137022e-244	547.988351949746	INTS4	Perfect	Transcriptomic
+2	ILMN_1685413	2.26668278643469	9.53040428002549	35.3796210171258	9.90009325629845e-213	1.70093502236464e-208	467.004073324563	ALG8	Perfect	Transcriptomic
+3	ILMN_2365686	2.24006552246413	8.63726581182952	33.4457850486822	1.16444452408395e-194	1.33375475788576e-190	426.599442861725	ALG8	Perfect	Transcriptomic
+4	ILMN_1736814	2.14456826221229	9.6500753365316	32.8997186513248	1.31847532581186e-189	1.13263622863868e-185	415.291156761191	CLNS1A	Perfect	Transcriptomic
+   
+
+2) python /mnt/galaxy/galaxy-app/tools/filters/joinWrapper.py /mnt/galaxy/files/000/514/dataset_514287.dat /mnt/galaxy/files/000/514/dataset_514277.dat 4 9 N /mnt/galaxy/files/000/514/dataset_514289.dat
+
+3) 
+
+sort captured promoters
+
+for f in *.txt.bed; do sortBed -i $f > ${f%%.txt.bed}.sort.bed; done
+
+intervene pairwise analysis
+
+#Fisher
+
+intervene pairwise --sort --compute=fisher --genome hg19 -i limmaIntClust10.sort.bed limmaIntClust1.sort.bed limmaIntClust2.sort.bed limmaIntClust3.sort.bed limmaIntClust4.sort.bed limmaIntClust5.sort.bed limmaIntClust6.sort.bed limmaIntClust7.sort.bed limmaIntClust8.sort.bed limmaIntClust9.sort.bed AB521M_specific_G4.bed AB863_specific_G4.bed common.PDTX.hg19.peaks.bed HCI005_specific_G4.bed HCI009_specific_G4.bed STG139M_specific_G4.bed STG143_specific_G4.bed STG201_specific_G4.bed STG316_specific_G4.bed STG331_specific_G4.bed VHIO098_specific_G4.bed VHIO179_specific_G4.bed -o /path/fisher.all.IC
