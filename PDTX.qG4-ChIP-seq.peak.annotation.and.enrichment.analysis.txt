@@ -1,0 +1,16 @@
+PDTX qG4-ChIP-seq peak annotation and enrichment analysis. PAVIS33 was used to annotate ~19,000 PDTX G4-ChIP-seq regions. 
+Enrichment analysis was performed as described for DG4R/CG4R enrichment in CNA classifications relative to random permutation. 
+To calculate enrichment of annotations, ratios of the annotated G4 ChIP-seq proportions were performed with the proportions of
+the randomly shuffled features across potential G4 DNA sequences (N = 5).
+
+
+
+#Perform genome annotation with PAVIS (https://manticore.niehs.nih.gov/pavis2) with the "hg19.all_peaks.25M.over99nt.sort.bed" 
+file and 5 randomly shuffled files. PAVIS --> W. Huang, R. Loganantharaj, B. Schroeder, D. Fargo, and L. Li. PAVIS: a tool for 
+Peak Annotation and Visualization. Bioinformatics, 2013, doi:10.1093/bioinformatics/btt520.
+###################################################################################################################################################
+
+Shuffle in potential human G4 DNA sequences.
+############################################
+
+n=(1 2 3 4 5); for f in hg19.all_peaks.25M.over99nt.sort.bed; do for i in "${!n[@]}"; do bedtools shuffle -incl SortBed_on_G4_seq_hits.bed -chromFirst -noOverlapping -seed ${n[i]} -i $f -g /Users/hansel01/data_seq/SLX-15831/OQS_count_analysis/hg19.genome3 | sort -k1,1 -k2,2n > ${f%%.bed}.shuffle_${n[i]}.bed; done; done
