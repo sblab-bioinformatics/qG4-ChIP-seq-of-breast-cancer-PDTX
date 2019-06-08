@@ -1,0 +1,449 @@
+Transcription factor binding site (TFBS) - DG4R enrichment analysis. Highly significant (MACS2.0 Q value < 1E-06) TFBS 
+were derived from 1,326 Transcription factor ChIP–seq datasets, which are integrated in the comprehensive ChIP-seq database 
+ChIP-Atlas. The ChIP-Atlas -Enrichment analysis tool was used to measure the enrichment of all 11 DG4Rs in TFBS relative to 
+random permutation (N = 100). Fold enrichment data (Supplementary information) were filtered for significance (Fisher-test, 
+p-value = log10 (<-3)). A PDTX model (x-axis) TF (y-axis) matrix of DG4R-TFBS fold enrichment values, as well as the reverse 
+order, was established to generate Pearson correlation matrixes of TFs across PDTX models (Fig. 3, Extended Data Fig. 3) using
+R. The R-package corrplot was used to visualise correlation matrixes as heatmaps.
+
+Use ChIP-ATLAS data and look for fold enrichment of G4 ChIP regions vs. random.
+
+#upload PDTX G4-DBA vs all into ChIP-Atlas and downloaded G4 TF breast cancer fold-enrichment from ChIP-ATLAS
+
+Parameters for fold enrichment 100 randomizations, MACS q-value specificity Q value < 1E-06
+
+Make matrix: x-axis PDTX diff or conserved class; y-axis = TF-CHIP data
+
+#transfer fold.enrichment lists to galaxy --> process tables to essential columns, name of TF, -log10P-value <=-3 (fisher).
+Galaxy procedure:
+
+
+Folllowing parameters were used to generate Fold enrichment analysis of differential G4 PDTX and conserved PDTX regions.
+
+Collection list generated for enrichment tables from ChIP-Atlas containing 12 files = "chip-atlas.lists"
+
+1) Add column
+
+Tool Parameters
+Input Parameter	Value	Note for rerun
+Add this value	_	
+to Dataset	794: G4.TF.enrich.unchanged.vs.all	
+Iterate?	NO	
+Inheritance Chain
+Add column on data 794
+Command Line
+perl /mnt/galaxy/galaxy-app/tools/filters/fixedValueColumn.pl /mnt/galaxy/files/000/539/dataset_539879.dat /mnt/galaxy/files/000/539/dataset_539880.dat "_" no
+Dataset peek
+SRX666556	TFs and others	HIF1A	Breast	T-47D	39018	721/876	7/876	-321.487	-318.4	103		_
+SRX265420	TFs and others	KDM5B	Breast	T-47D	27447	504/876	4/876	-187.967	-185.181	126		_
+SRX250091	TFs and others	MYC	Breast	MDA-MB-453	10571	485/876	2/876	-182.202	-179.592	242.5		_
+SRX666557	TFs and others	ARNTL	Breast	T-47D	18094	403/876	3/876	-141	-138.515	134.333		_
+SRX150556	TFs and others	E2F1	Breast	MCF-7	9561	385/876	2/876	-134.903	-132.515	192.5		_
+
+
+2) Merge columns
+
+Tool Parameters
+Input Parameter	Value	Note for rerun
+Select data	15: Add column on data 794	
+Merge column	1	
+with column	13	
+Add column	3	
+Inheritance Chain
+Merge Columns on data 15
+Command Line
+python /mnt/galaxy/galaxy-app/tools/filters/mergeCols.py /mnt/galaxy/files/000/539/dataset_539880.dat /mnt/galaxy/files/000/539/dataset_539892.dat 1 13 3
+Dataset peek
+SRX666556	TFs and others	HIF1A	Breast	T-47D	39018	721/876	7/876	-321.487	-318.4	103		_	SRX666556_HIF1A
+SRX265420	TFs and others	KDM5B	Breast	T-47D	27447	504/876	4/876	-187.967	-185.181	126		_	SRX265420_KDM5B
+SRX250091	TFs and others	MYC	Breast	MDA-MB-453	10571	485/876	2/876	-182.202	-179.592	242.5		_	SRX250091_MYC
+SRX666557	TFs and others	ARNTL	Breast	T-47D	18094	403/876	3/876	-141	-138.515	134.333		_	SRX666557_ARNTL
+SRX150556	TFs and others	E2F1	Breast	MCF-7	9561	385/876	2/876	-134.903	-132.515	192.5		_	SRX150556_E2F1
+  
+
+3) Cut
+
+Tool Parameters
+Input Parameter	Value	Note for rerun
+Cut columns	c14,c9,c11	
+Delimited by	Tab	
+From	28: Merge Columns on data 15	
+Inheritance Chain
+Cut on data 28
+Command Line
+perl /mnt/galaxy/galaxy-app/tools/filters/cutWrapper.pl "/mnt/galaxy/files/000/539/dataset_539892.dat" "c14,c9,c11" "T" "/mnt/galaxy/files/000/539/dataset_539904.dat"
+Dataset peek
+SRX666556_HIF1A	-321.487	103
+SRX265420_KDM5B	-187.967	126
+SRX250091_MYC	-182.202	242.5
+SRX666557_ARNTL	-141	134.333
+SRX150556_E2F1	-134.903	192.5
+    
+
+4) Filter
+
+Tool Parameters
+Input Parameter	Value	Note for rerun
+Filter	41: Cut on data 28	
+With following condition	c2<-3	
+Number of header lines to skip	0	
+Inheritance Chain
+Filter on data 41
+Command Line
+python '/mnt/galaxy/galaxy-app/tools/stats/filtering.py' '/mnt/galaxy/files/000/539/dataset_539904.dat' '/mnt/galaxy/files/000/539/dataset_539916.dat' '/mnt/galaxy/tmp/job_working_directory/000/332/332916/tmpGKJwqr' 3 "str,float,float" 0
+Dataset peek
+SRX666556_HIF1A	-321.487	103
+SRX265420_KDM5B	-187.967	126
+SRX250091_MYC	-182.202	242.5
+SRX666557_ARNTL	-141	134.333
+SRX150556_E2F1	-134.903	192.5
+   
+5) Select
+
+Tool Parameters
+Input Parameter	Value	Note for rerun
+Select lines from	54: Filter on data 41	
+that	NOT Matching	
+the pattern	(inf)	
+Inheritance Chain
+Select on data 54
+Command Line
+python /mnt/galaxy/galaxy-app/tools/filters/grep.py -i /mnt/galaxy/files/000/539/dataset_539916.dat -o /mnt/galaxy/files/000/539/dataset_539928.dat -pattern '(inf)' -v true
+Dataset peek
+SRX666556_HIF1A	-321.487	103
+SRX265420_KDM5B	-187.967	126
+SRX250091_MYC	-182.202	242.5
+SRX666557_ARNTL	-141	134.333
+SRX150556_E2F1	-134.903	192.5
+
+6) upload list of SRX_TF names that are enriched in at least 1 of 11 DG4R - TF enrichments
+
+Tool Parameters
+Input Parameter	Value	Note for rerun
+File Format	tabular	
+file_count	1	
+Specify Files for Dataset (tabular)	1 uploaded datasets	
+Genome	unspecified (?) ----- Additional Species Are Below -----	
+File Format	tabular	
+Inheritance Chain
+all.ChIP-atlas.enriched.TF.datasets.txt
+↑
+'all.ChIP-atlas.enriched.TF.datasets.txt' in chip-atlas
+Command Line
+python '/mnt/galaxy/galaxy-app/tools/data_source/upload.py' /mnt/galaxy/galaxy-app /mnt/galaxy/tmp/job_working_directory/000/320/320886/registry.xml /mnt/galaxy/tmp/job_working_directory/000/320/320886/upload_params.json 518756:/mnt/galaxy/tmp/job_working_directory/000/320/320886/dataset_518756_files:/mnt/galaxy/files/000/518/dataset_518756.dat
+Dataset peek
+SRX018833_TFAP2C
+SRX028632_TFAP2C
+SRX028633_TFAP2C
+SRX038562_CTCF
+SRX063917_ERG
+
+
+7) Column Regex Find And Replace
+
+Tool Parameters
+Input Parameter	Value	Note for rerun
+Select cells from	67: Select on data 54	
+using column	1	
+Find Regex	SRX150480_E2F4	
+Replacement	SRX150480_E2F4.SRC	
+Inheritance Chain
+Column Regex Find And Replace on data 67
+Command Line
+python /mnt/galaxy/shed_tools/toolshed.g2.bx.psu.edu/repos/galaxyp/regex_find_replace/209b7c5ee9d7/regex_find_replace/regex.py --input '/mnt/galaxy/files/000/539/dataset_539928.dat' --output '/mnt/galaxy/files/000/540/dataset_540460.dat' --column 1 --input_display_name 'Select on data 54' --pattern='SRX150480_E2F4' --replacement='SRX150480_E2F4.SRC'
+Dataset peek
+SRX666556_HIF1A	-321.487	103
+SRX265420_KDM5B	-187.967	126
+SRX250091_MYC	-182.202	242.5
+SRX666557_ARNTL	-141	134.333
+SRX150556_E2F1	-134.903	192.5
+
+8) Column Regex Find And Replace
+
+Tool Parameters
+Input Parameter	Value	Note for rerun
+Select cells from	79: all.ChIP-atlas.enriched.TF.datasets.txt	
+using column	1	
+Find Regex	SRX150480_E2F4	
+Replacement	SRX150480_E2F4.SRC	
+Inheritance Chain
+all.ChIP-atlas.enriched.TF.datasets.with.E2F4.SRC.txt
+Command Line
+python /mnt/galaxy/shed_tools/toolshed.g2.bx.psu.edu/repos/galaxyp/regex_find_replace/209b7c5ee9d7/regex_find_replace/regex.py --input '/mnt/galaxy/files/000/518/dataset_518756.dat' --output '/mnt/galaxy/files/000/540/dataset_540544.dat' --column 1 --input_display_name 'all.ChIP-atlas.enriched.TF.datasets.txt' --pattern='SRX150480_E2F4' --replacement='SRX150480_E2F4.SRC'
+Dataset peek
+SRX018833_TFAP2C
+SRX028632_TFAP2C
+SRX028633_TFAP2C
+SRX038562_CTCF
+SRX063917_ERG
+
+9) Join two Datasets
+
+Tool Parameters
+Input Parameter	Value	Note for rerun
+Join	223: all.ChIP-atlas.enriched.TF.datasets.with.E2F4.SRC.txt	
+using column	1	
+with	146: Column Regex Find And Replace on data 67	
+and column	1	
+Keep lines of first input that do not join with second input	Yes	
+Keep lines of first input that are incomplete	No	
+Fill empty columns	fill_empty	
+Only fill unjoined rows	Yes	
+Fill Columns by	single_fill_value	
+Fill value	0	
+Keep the header lines	No	
+Inheritance Chain
+Join two Datasets on data 146 and data 223
+Command Line
+python '/mnt/galaxy/galaxy-app/tools/filters/join.py' '/mnt/galaxy/files/000/540/dataset_540544.dat' '/mnt/galaxy/files/000/540/dataset_540460.dat' 1 1 '/mnt/galaxy/files/000/540/dataset_540545.dat' -u  --index_depth=3 --buffer=50000000 --fill_options_file=/mnt/galaxy/tmp/job_working_directory/000/333/333165/tmpz5MF2T
+Job Dependencies
+Dependency	Dependency Type	Version
+python	conda	2.7.13
+Dataset peek
+SRX018833_TFAP2C	SRX018833_TFAP2C	-12.7222	47
+SRX028632_TFAP2C	SRX028632_TFAP2C	-17.0185	61
+SRX028633_TFAP2C	SRX028633_TFAP2C	-19.5082	69
+SRX038562_CTCF	SRX038562_CTCF	-9.85562	20.5
+SRX063917_ERG	SRX063917_ERG	-67.0328	210
+ 
+
+10) Cut
+
+Tool Parameters
+Input Parameter	Value	Note for rerun
+Cut columns	c1,c4	
+Delimited by	Tab	
+From	225: Join two Datasets on data 146 and data 223	
+Inheritance Chain
+Cut on data 225
+Command Line
+perl /mnt/galaxy/galaxy-app/tools/filters/cutWrapper.pl "/mnt/galaxy/files/000/540/dataset_540545.dat" "c1,c4" "T" "/mnt/galaxy/files/000/540/dataset_540557.dat"
+Dataset peek
+SRX018833_TFAP2C	47
+SRX028632_TFAP2C	61
+SRX028633_TFAP2C	69
+SRX038562_CTCF	20.5
+SRX063917_ERG	210
+
+
+11) Column Regex Find And Replace
+
+Tool Parameters
+Input Parameter	Value	Note for rerun
+Select cells from	238: Cut on data 225	
+using column	1	
+Find Regex	_	
+Replacement	\t	
+Inheritance Chain
+Column Regex Find And Replace on data 238
+Command Line
+python /mnt/galaxy/shed_tools/toolshed.g2.bx.psu.edu/repos/galaxyp/regex_find_replace/209b7c5ee9d7/regex_find_replace/regex.py --input '/mnt/galaxy/files/000/540/dataset_540557.dat' --output '/mnt/galaxy/files/000/540/dataset_540569.dat' --column 1 --input_display_name 'Cut on data 225' --pattern='_' --replacement='__backslash__t'
+Dataset peek
+SRX018833	TFAP2C	47
+SRX028632	TFAP2C	61
+SRX028633	TFAP2C	69
+SRX038562	CTCF	20.5
+SRX063917	ERG	210
+  
+
+12) Sort on collection 250
+
+Tool Parameters
+Input Parameter	Value	Note for rerun
+Sort Dataset	251: Column Regex Find And Replace on data 238	
+on column	2	
+with flavor	Alphabetical sort	
+everything in	Ascending order	
+Number of header lines to skip	0	
+Inheritance Chain
+Sort on data 251
+Command Line
+python '/mnt/galaxy/galaxy-app/tools/filters/sorter.py'  --input='/mnt/galaxy/files/000/540/dataset_540569.dat' --output='/mnt/galaxy/files/000/540/dataset_540581.dat'    --key=2,2   --header 0
+Job Dependencies
+Dependency	Dependency Type	Version
+python	conda	2.7.13
+grep	conda	2.14
+sed	conda	4.4
+Dataset peek
+SRX518254	5-mC	0
+SRX201314	AHR	0
+SRX2378690	AHR	0
+SRX2378691	AHR	0
+SRX2378694	AHR	0
+ 
+13) Group
+
+Tool Parameters
+Input Parameter	Value	Note for rerun
+Select data	264: Sort on data 251	
+Group by column	2	
+Ignore case while grouping?	False	
+Ignore lines beginning with these characters	Nothing selected.	
+Type	Median	
+On column	3	
+Round result to nearest integer?	NO	
+Inheritance Chain
+Group on data 264
+Command Line
+python /mnt/galaxy/galaxy-app/tools/stats/grouping.py "/mnt/galaxy/files/000/540/dataset_540593.dat" "/mnt/galaxy/files/000/540/dataset_540581.dat" "2" "0" "None" 'median 3 no'
+Dataset peek
+5-mC	0
+AHR	0
+APOBEC3B	0
+AR	0
+ARNT	0
+
+
+14) Select on collection 276
+
+Tool Parameters
+Input Parameter	Value	Note for rerun
+Select lines from	277: Group on data 264	
+that	NOT Matching	
+the pattern	(Biotin)|(5-mC)	
+Inheritance Chain
+Select on data 277
+Command Line
+python /mnt/galaxy/galaxy-app/tools/filters/grep.py -i /mnt/galaxy/files/000/540/dataset_540593.dat -o /mnt/galaxy/files/000/540/dataset_540617.dat -pattern '(Biotin)|(5-mC)' -v true
+Dataset peek
+AHR	0
+APOBEC3B	0
+AR	0
+ARNT	0
+ARNTL	134.333
+
+15) Upload File
+
+Tool Parameters
+Input Parameter	Value	Note for rerun
+File Format	tabular	
+file_count	1	
+Specify Files for Dataset (tabular)	1 uploaded datasets	
+Genome	unspecified (?) ----- Additional Species Are Below -----	
+File Format	tabular	
+Inheritance Chain
+matrix.G4.enrich.TF.G4DBA.vs.all.fc.0.6.txt
+Command Line
+python '/mnt/galaxy/galaxy-app/tools/data_source/upload.py' /mnt/galaxy/galaxy-app /mnt/galaxy/tmp/job_working_directory/000/333/333247/registry.xml /mnt/galaxy/tmp/job_working_directory/000/333/333247/upload_params.json 540673:/mnt/galaxy/tmp/job_working_directory/000/333/333247/dataset_540673_files:/mnt/galaxy/files/000/540/dataset_540673.dat
+Dataset peek
+PDTX	AB521M	AB863	HCI005	HCI009	STG139M	STG143	STG201	STG316	STG331	unchanged	VHIO098	VHIO179
+AHR	15	0	0	0	0	0	10.1667	0	0	0	0	23
+APOBEC3B	104	28	0	22.3333	49	0	28	29.5	50	0	29.3333	29
+AR	6.25	0	11.5	14	0	16	5.4	4.16667	25	0	14	36
+ARNT	0	0	0	0	0	0	0	0	0	0	0	15
+
+16) Upload File
+
+Tool Parameters
+Input Parameter	Value	Note for rerun
+File Format	tabular	
+file_count	1	
+Specify Files for Dataset (tabular)	1 uploaded datasets	
+Genome	unspecified (?) ----- Additional Species Are Below -----	
+File Format	tabular	
+Inheritance Chain
+labels.corrplot.TF.ChIP.vs.G4.PDTX.corrpear.reverse2
+Command Line
+python '/mnt/galaxy/galaxy-app/tools/data_source/upload.py' /mnt/galaxy/galaxy-app /mnt/galaxy/tmp/job_working_directory/000/333/333248/registry.xml /mnt/galaxy/tmp/job_working_directory/000/333/333248/upload_params.json 540674:/mnt/galaxy/tmp/job_working_directory/000/333/333248/dataset_540674_files:/mnt/galaxy/files/000/540/dataset_540674.dat
+Dataset peek
+CHD8
+PBX1
+CREB1
+GREB1
+TRIM25
+
+17) Join two Datasets
+
+Tool Parameters
+Input Parameter	Value	Note for rerun
+Join	303: labels.corrplot.TF.ChIP.vs.G4.PDTX.corrpear.reverse2	
+using column	1	
+with	302: matrix.G4.enrich.TF.G4DBA.vs.all.fc.0.6.txt	
+and column	1	
+Keep lines of first input that do not join with second input	No	
+Keep lines of first input that are incomplete	No	
+Fill empty columns	no_fill	
+Keep the header lines	No	
+Inheritance Chain
+Join two Datasets on data 302 and data 303
+Command Line
+python '/mnt/galaxy/galaxy-app/tools/filters/join.py' '/mnt/galaxy/files/000/540/dataset_540674.dat' '/mnt/galaxy/files/000/540/dataset_540673.dat' 1 1 '/mnt/galaxy/files/000/540/dataset_540675.dat'   --index_depth=3 --buffer=50000000 --fill_options_file=/mnt/galaxy/tmp/job_working_directory/000/333/333249/tmpV7VT95
+Job Dependencies
+Dependency	Dependency Type	Version
+python	conda	2.7.13
+Dataset peek
+CHD8	CHD8	0	0	0	0	0	0	0	0	0.0714286	0	0	0
+PBX1	PBX1	0	0	0	20	41	0	46	111	82	0	54	44
+CREB1	CREB1	0	0	0	0	0	0	36	28	30	0	23	37
+GREB1	GREB1	0	0	0	0	0	0	20	19	34	0	16	19
+TRIM25	TRIM25	69.75	110	25	55.125	33	50	53.3335	59.25	72.75	27.5	91.3	80.4
+
+
+
+18) Select first
+
+Tool Parameters
+Input Parameter	Value	Note for rerun
+Select first	1	
+from	302: matrix.G4.enrich.TF.G4DBA.vs.all.fc.0.6.txt	
+Inheritance Chain
+Select first on data 302
+Command Line
+perl /mnt/galaxy/galaxy-app/tools/filters/headWrapper.pl /mnt/galaxy/files/000/540/dataset_540673.dat 1 /mnt/galaxy/files/000/540/dataset_540676.dat
+Dataset peek
+PDTX	AB521M	AB863	HCI005	HCI009	STG139M	STG143	STG201	STG316	STG331	unchanged	VHIO098	VHIO179
+
+19) cut
+
+Tool Parameters
+Input Parameter	Value	Note for rerun
+Cut columns	c2-c14	
+Delimited by	Tab	
+From	304: Join two Datasets on data 302 and data 303	
+Inheritance Chain
+Cut on data 304
+Command Line
+perl /mnt/galaxy/galaxy-app/tools/filters/cutWrapper.pl "/mnt/galaxy/files/000/540/dataset_540675.dat" "c2-c14" "T" "/mnt/galaxy/files/000/540/dataset_540677.dat"
+Dataset peek
+CHD8	0	0	0	0	0	0	0	0	0.0714286	0	0	0
+PBX1	0	0	0	20	41	0	46	111	82	0	54	44
+CREB1	0	0	0	0	0	0	36	28	30	0	23	37
+GREB1	0	0	0	0	0	0	20	19	34	0	16	19
+TRIM25	69.75	110	25	55.125	33	50	53.3335	59.25	72.75	27.5	91.3	80.4
+
+
+20) Concatenate datasets
+
+Tool Parameters
+Input Parameter	Value	Note for rerun
+Concatenate Dataset	305: Select first on data 302	
+Select	306: Cut on data 304	
+Inheritance Chain
+TF.hclust.matrix.G4.enrich.TF.G4DBA.vs.all.fc.0.6.txt
+Command Line
+python /mnt/galaxy/galaxy-app/tools/filters/catWrapper.py /mnt/galaxy/files/000/540/dataset_540678.dat /mnt/galaxy/files/000/540/dataset_540676.dat /mnt/galaxy/files/000/540/dataset_540677.dat
+Dataset peek
+PDTX	AB521M	AB863	HCI005	HCI009	STG139M	STG143	STG201	STG316	STG331	unchanged	VHIO098	VHIO179
+CHD8	0	0	0	0	0	0	0	0	0.0714286	0	0	0
+PBX1	0	0	0	20	41	0	46	111	82	0	54	44
+CREB1	0	0	0	0	0	0	36	28	30	0	23	37
+GREB1	0	0	0	0	0	0	20	19	34	0	16	19
+
+
+
+21) To generate matrix containing all the fold enrichments for all possible factors --> isolate   
+
+Measure correlation of TFChIP and G4 data by clustering the fold enrichment for all PDTX models and TF data. Use PDTC script. 
+
+#generate header to be pasted on enrichments for TF/G4
+
+echo -e PDTX"\t"AB521M"\t"AB863"\t"HCI005"\t"HCI009"\t"STG139M"\t"STG143"\t"STG201"\t"STG316"\t"STG331"\t"unchanged"\t"VHIO098"\t"VHIO179 > header.pasted.G4.enrich.TF.G4DBA.multi.txt
+
+G4.TF.enrich.AB521M.vs.all.tabular G4.TF.enrich.AB863.vs.all.tabular G4.TF.enrich.HCI005.vs.all.tabular G4.TF.enrich.HCI009.vs.all.tabular G4.TF.enrich.STG139M.vs.all.tabular G4.TF.enrich.STG143.vs.all.tabular G4.TF.enrich.STG201.vs.all.tabular G4.TF.enrich.STG316.vs.all.tabular G4.TF.enrich.STG331.vs.all.tabular G4.TF.enrich.unchanged.vs.all.tabular G4.TF.enrich.VHIO098.vs.all.tabular G4.TF.enrich.VHIO179.vs.all.tabular
+
+paste G4.TF.enrich.AB521M.vs.all.tabular G4.TF.enrich.AB863.vs.all.tabular G4.TF.enrich.HCI005.vs.all.tabular G4.TF.enrich.HCI009.vs.all.tabular G4.TF.enrich.STG139M.vs.all.tabular G4.TF.enrich.STG143.vs.all.tabular G4.TF.enrich.STG201.vs.all.tabular G4.TF.enrich.STG316.vs.all.tabular G4.TF.enrich.STG331.vs.all.tabular G4.TF.enrich.unchanged.vs.all.tabular G4.TF.enrich.VHIO098.vs.all.tabular G4.TF.enrich.VHIO179.vs.all.tabular | cut -f 1,2,4,6,8,10,12,14,16,18,20,22,24 > pasted.G4.enrich.TF.G4DBA.vs.all.fc.0.6.txt
+
+cat header.pasted.G4.enrich.TF.G4DBA.multi.txt pasted.G4.enrich.TF.G4DBA.vs.all.fc.0.6.txt > matrix.G4.enrich.TF.G4DBA.vs.all.fc.0.6.txt
+
+cat header.pasted.G4.enrich.TF.G4DBA.multi.txt pasted.G4.enrich.TF.G4DBA.vs.all.fc.0.6.txt | datamash transpose > transposed.matrix.G4.enrich.TF.G4DBA.vs.all.fc.0.6.txt
+
