@@ -1,0 +1,23 @@
+DG4R.CG4R - Association - 45 common driver regions. The genomic coordinate information of 45 common breast cancer driver regions were 
+taken from Curtis et al. Nature 2012 and adapted to the hg19 coordinate information using the liftover tool from UCSC. DG4Rs or CG4Rs were 
+associated with the 45 common driver regions using intervene pairwise and the bedtools fisher option.
+
+Check association of breast cancer driver genes with qG4-ChIP-seq data
+
+#1) Curtis et al. breast cancer driver list converted to hg19 using UCSC liftover tool.
+Use intervene to overlap with G4s in different CNA states or Promoter G4s in different CNA and gene expression states.
+Use pre-existing coordinate information for the G4-data sets.
+
+#2) Measure association using fisher test.
+
+#Fisher
+
+#!/bin/sh
+#SBATCH --partition general
+#SBATCH --mem 64G
+#SBATCH --job-name interv     
+#SBATCH --output /path/fisher.%j.out
+
+intervene pairwise --compute=fisher --genome hg19 -i regions_driver_breastcancer.hg19.sort.bed common.PDTX.hg19.peaks.sort.bed AB521M_specific_G4.bed AB863_specific_G4.bed HCI005_specific_G4.bed HCI009_specific_G4.bed STG139M_specific_G4.bed STG143_specific_G4.bed STG201_specific_G4.bed STG316_specific_G4.bed STG331_specific_G4.bed VHIO098_specific_G4.bed VHIO179_specific_G4.bed -o /path/fisher
+
+sbatch intervene.fisher.sh
