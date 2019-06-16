@@ -1,4 +1,4 @@
-PDTX qG4-ChIP-seq peak annotation and enrichment analysis. PAVIS33 was used to annotate ~19,000 PDTX G4-ChIP-seq regions. 
+PDTX qG4-ChIP-seq peak annotation and enrichment analysis. PAVIS was used to annotate ~19,000 PDTX G4-ChIP-seq regions. 
 Enrichment analysis was performed as described for DG4R/CG4R enrichment in CNA classifications relative to random permutation. 
 To calculate enrichment of annotations, ratios of the annotated G4 ChIP-seq proportions were performed with the proportions of
 the randomly shuffled features across potential G4 DNA sequences (N = 5).
