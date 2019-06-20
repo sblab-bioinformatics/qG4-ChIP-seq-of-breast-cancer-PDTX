@@ -1,0 +1,19 @@
+#DG4R PDTX stratification. All 11 PDTX DG4Rs were systematically overlapped using
+#intervene pairwise and the bedtools jaccard option34. Jaccard indexes for all the 11 x 11 PDTX
+#DG4R model combinations were correlated (Pearson) and PDTX stratification achieved
+#through hierarchical clustering using euclidean distance. Visualisation of the PDTX
+#stratification was performed by the shiny application of Khan et al. (2017).
+
+nano intervene.jaccard.sh
+
+#!/bin/sh
+#SBATCH --partition general
+#SBATCH --mem 16G
+#SBATCH --job-name interv     
+#SBATCH --output /path/jaccard/jaccard.%j.out
+
+intervene pairwise --compute=jaccard --genome hg19 --fontsize 3 -i AB521M_specific_G4.bed AB863_specific_G4.bed HCI005_specific_G4.bed HCI009_specific_G4.bed STG139M_specific_G4.bed STG143_specific_G4.bed STG201_specific_G4.bed STG316_specific_G4.bed STG331_specific_G4.bed VHIO098_specific_G4.bed VHIO179_specific_G4.bed -o /path/jaccard/
+
+sbatch intervene.jaccard.sh
+
+#To visualise in shiney app of Khan et al. (2017) --> change intervene output matrix ".txt" file name to ".csv" 
