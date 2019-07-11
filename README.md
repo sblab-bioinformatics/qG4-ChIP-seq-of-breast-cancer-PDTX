@@ -9,7 +9,7 @@ All the raw sequencing data, qG4-ChIP-seq fastq, bigwig and regions have been de
 
 - [Mapping, peak calling and peak processing](Mapping_peak.calling_and_peak.processing.txt): Basic analysis to get all BG4-antibody enriched G4 regions.
 
-- [Somatic copy number alteration profiling](Somatic.copy.number.alteration.profiling.txt): For each of 16 PDTX samples the genomic Input data was used estimate copy number abberations.
+- [Somatic copy number alteration profiling](Somatic.copy.number.alteration.profiling.txt): For each of 16 PDTX samples the genomic Input data was used to estimate copy number abberations.
 
 - [DG4Rs and CG4Rs.](DG4Rs.and.CG4Rs.txt): Normalisation factor extaction from spike-in/reference coverage variation; R-script to perform differential BG4 enrichment analysis; Extraction of DG4 and CG4R files
 
