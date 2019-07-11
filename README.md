@@ -11,11 +11,11 @@ All the raw sequencing data, qG4-ChIP-seq fastq, bigwig and regions have been de
 
 - [Somatic copy number alteration profiling](Somatic.copy.number.alteration.profiling.txt): For each of 16 PDTX samples the genomic Input data was used to estimate copy number abberations.
 
-- [DG4Rs and CG4Rs.](DG4Rs.and.CG4Rs.txt): Normalisation factor extaction from spike-in/reference coverage variation; R-script to perform differential BG4 enrichment analysis; Extraction of DG4 and CG4R files
+- [DG4Rs and CG4Rs.](DG4Rs.and.CG4Rs.txt): Normalisation factor extraction from spike-in/reference coverage variation; R-script to perform differential BG4 enrichment analysis; Extraction of DG4R and CG4R files
 
 - [DG4R PDTX stratification](DG4R.PDTX.stratification.txt): Systematic DG4R overlap with other DG4Rs and similarity analysis.
 
-- [DG4R/CG4R enrichment in CNA classifications relative to random permutation](/DG4R.CG4R.enrichment.in.CNA.classifications.relative.to.random.permutation.txt): DG4R or CG4 enrichments in copy number aberrations.
+- [DG4R/CG4R enrichment in CNA classifications relative to random permutation](/DG4R.CG4R.enrichment.in.CNA.classifications.relative.to.random.permutation.txt): DG4R or CG4R enrichments in copy number aberrations.
 
 - [PDTX qG4-ChIP-seq peak annotation and enrichment analysis](PDTX.qG4-ChIP-seq.peak.annotation.and.enrichment.analysis.txt): Genome annotation of PDTX BG4 enriched regions.
 
