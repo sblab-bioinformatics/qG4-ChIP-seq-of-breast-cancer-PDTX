@@ -1,5 +1,6 @@
 This repository contains data access and computational analyses for the methods developed in our Hänsel-Hertsch et al. 2019 manuscript.
 
+
 ## Data
 
 All the raw sequencing data, qG4-ChIP-seq fastq, bigwig and regions have been deposited in the ArrayExpress database at EMBL-EBI under accession number [E-MTAB-7949](https://www.ebi.ac.uk/arrayexpress/experiments/E-MTAB-7949). For clarity purposes, 1) a table [sdrf](sdrf.tsv) explaining the source of all files in "E-MTAB-7949" and 2) a text file [idf](idf.tsv) describing more details of qG4-ChIP-seq protocol.
