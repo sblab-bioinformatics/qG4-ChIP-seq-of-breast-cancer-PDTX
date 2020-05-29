@@ -1,0 +1,119 @@
+---
+title: "README.md"
+output: github_document
+author: angela simeone
+---
+
+# About this repository
+This repository collects bash and R scripts used for the analysis of the PDTX models by quantitative G4-ChIP-seq (qG4-ChIP-seq). 22 PDTX models have been profiled by qG4-ChIP-seq in 4 technical replicates plus input (5 libraries each).<br />
+
+In this study (PID, DOI:) we process the sequencing data in order to indetify regions that are show signal differentially up-regulated in each of the model when compared to all the others and we called them ΔG4. This resulted in a set of ΔG4 for each model (22 individual ΔG4 sets). We then explored and characterize all the ΔG4 in respect to expression, to copy number alterations and to transcritpion factor binding profiles. 
+
+ [_Experimental design_](./Experimental_design_PDTXs).
+
+Listed below are the different steps followed to perform the the analysis of qBG4-ChIP-seq
+
+
+# Data 
+Data produced using the qG4-ChIP-seq have been deposited at [E-MTAB-7949](https://www.ebi.ac.uk/arrayexpress/experiments/E-MTAB-7949). The sample file describing the deposited data is [here](sdrf.tsv).
+Additional information about the qG4-ChIP-seq protocol [here](idf.tsv).
+
+The repository contains fastq files and processed files (peaks files, bw track files).
+
+# Data analysis and code
+
+Listed below are the different steps followed to perform the the analysis of qBG4-ChIP-seq.
+
+* [__Sequencing (Fastq) processing: alignment, peak calling and  consensus regions generation from peaks__](./Basic_Processing.md): adapter removal, alignment, species separation, duplicates removal, peak calling, downsample input files and repeat peak calling, extraction of multi2 regions (regions confirmed in 2 out of 4 replicates), merge old consensus (first round of experiments) to new consensus (second round of experiments). 
+
+* [__Analysis of PDTX samples qBG4-ChIP-seq__](./Analysis_first_second_phase_PDTXs.md)<br /> 
+Use human consensus to estimate human signal, use [_Drosophila ROI consensus regions_](./input_files/consensus_dm6_over_21_multi2_samples.bed) to estimate drosophila signal, collect all stats (libraries sizes, coverages for human and drosophila respectively) necessary to proceed to drosophila normalization.<br /> 
+Intermediate files are generated and used in the customized R script to generate sample file and to extract normalization factors.
+
+    + [__R script to generate sample file and compute drosophila normalization factors__](./Generate_sample_file_PDTX_only.R)
+    + [__R script to perform drosophila normalization__](./ChIP_analysis_normalize_data_input_subtraction_PDTX.R)
+    + [__R script to perform recursive differential analysis and generate DG4 regions (DG4R)__](./ChIP_analysis.diff_bind_PDTX.R)
+
+* [__Characterization of differential regions ΔG4__](./Characterization_DG4R.md)<br /> 
+Pairwise comparison of PDTX G4 regions (Jaccard index), fold-enrichment of PDTXs at 45 cancer drivers genes, G4-motifs analysis, prepare data to analyze associatio of ΔG4 to expression.
+
+* [__Association of ΔG4 to expression__](/Compare_expressionValues_DG4R_CG4R.R)<br /> 
+R script to explore association between presence of ΔG4 in promoter and relative expression levels in each individual PDTX model. This analysis shows that The presence of ΔG4 is generally associated to higly expressed gene.
+
+* [__Association of ΔG4 to CNA__](./Association_DG4R_to_CNA.md)<br /> 
+Explore fold-enrichment of ΔG4 at CNA regions. This analysis is done for each individual PDTX (i.e. indivudual PDTXs CNA have been identified first and then ΔG4 have been compared to them). 
+    + [__R script to identify CNA given input library bam (5M subsampling)__](./copy_number_alteration_identification_script.R)<br />  
+    This script uses the R package "QDNAseq".
+
+* [__Association of ΔG4 to CNA (copy number alterations) and expression__](/Users/simeon01/Documents/PDTX/REVISIONS/PDTX_for_figures_generation/Comparison_Expression_DG4R_CNA.md)
+    + [__R script to perform the comparison between G4 levels, expression and CNA__](./Analysis_promoter_G4levels_expression_CNA.R)
+
+* [__Association of ΔG4 to SNV__](./Association_DG4R_to_SNV.md)<br /> 
+
+
+* [__Association of ΔG4 to TF binding sites (after downloading data from ChIP-Atlas)__](./Association_DG4R_to_CNA.md)
+
+    + [__R script to produce correaltions matrix from Fold Enrichment of TF data__](./transcirption_factors_breast_revised_9March2020.R)
+
+
+# Data files
+
+Here is the list of data files used at various stages of the analysis.
+
+
+Input files to generate the sample file
+
+* [_file containing total number of reads hg19_](./input_files/tot_num_reads_hg19_libraries.txt)
+* [_file containing total number of reads of dm6_](./input_files/dm6_stats_with_fnames.txt)
+
+Input files to perform drosophila normalization
+
+* [_Peak counts file_](./input_files/temp_concat_hg19_libraries.txt)
+* [_Sample file_](./input_files/sample_file_PDTX_only.txt)
+* [_Drosophila normalization factors_](./input_files/PDTX_old_new_dm6_norm5_peak_recovery.txt)
+
+
+Input files (consesus regions) to extract coverages:
+
+* [_Drosophila ROI consensus regions_](./input_files/consensus_dm6_over_21_multi2_samples.bed)
+* [_Human consensus regions_](./input_files/hg19_old_new_q005.all_peaks.25M.over99nt.sorted.bed)
+
+Input files to perform differential analysis
+
+* [_Peak counts file after input subtraction-library size norm- drosophila normalization_](peak_counts.norm_filtered.tab)
+* [_Sample file_](./input_files/sample_file_PDTX_only.txt)
+
+Input files to perform the analysis of the association between DG4R and expression
+
+* [_Coordinates of gene promoters hg19_](./input_files/hg19.gene_name.promoters.bed)
+* [_List of promoter with overlapping DG4R_](./input_files/hg19.gene_name.promoters.DG4r.bed)
+* [_List of promoter with overlapping CG4R_](./input_files/hg19.gene_name.promoters.CG4r.bed)
+* [_Expression values data table_](./input_files/ExpModelsData_all_plus_PARsamples.txt)
+
+Input files to perform analysis of helicases
+
+* [_List of helicases_](./input_files/helicase_list_angela.csv)
+
+Input files for analysis of the association between DG4R and CNA
+
+* [_genome file_](hg19_robert_github.size.genome)
+* [_occurances of overlaps between DG4R and CNA_AMP in the actual and randomized cases_](./input_files/PDTX_vs_all_AMP.sites)
+* [_occurances of overlaps between DG4R and CNA_GAIN in the actual and randomized cases_](./input_files/PDTX_vs_all_GAIN.sites)
+* [_occurances of overlaps between DG4R and CNA_NEUT in the actual and randomized cases_](./input_files/PDTX_vs_all_NEUT.sites)
+* [_occurances of overlaps between DG4R and CNA_HETD in the actual and randomized cases_](./input_files/PDTX_vs_all_HETD.sites)
+* [_occurances of overlaps between DG4R and CNA_HOMD in the actual and randomized cases_](./input_files/PDTX_vs_all_HOMD.sites)
+
+
+## Processed files
+
+* [_FE of DG4R at TF binding regions from ChIP-atlas_](/Users/simeon01/Documents/PDTX/REVISIONS/PDTX_for_figures_generation/PDTX_only_dm6_inputSubtraction/ChIP_atlas/Fold_enrichments_DG4R_at_TFbindingRegions.processed.csv)
+* [_Corr of TF-FE (DG4R at TF binding regions from ChIP-atlas)_](/Users/simeon01/Documents/PDTX/REVISIONS/PDTX_for_figures_generation/PDTX_only_dm6_inputSubtraction/ChIP_atlas/Corr_Spearm_TF_Fold_enrichments_DG4R_at_TFbindingRegions.processed.csv)
+* [_Corr of DG4R (FE of DG4R at TF binding regions from ChIP-atlas)_](/Users/simeon01/Documents/PDTX/REVISIONS/PDTX_for_figures_generation/PDTX_only_dm6_inputSubtraction/ChIP_atlas/Corr_Spearm_PDTX_Fold_enrichments_DG4R_at_TFbindingRegions.processed.csv)
+
+
+## Contact us
+
+For any query contact us: [Angela](mailto:angela.simeone@cruk.cam.ac.uk) and [Robert](mailto:robert.haensel-hertsch@uni-koeln.de).
+
+
+
