@@ -23,6 +23,7 @@ The repository contains fastq files and processed files (peaks files, bw track f
 Data analysis and code
 ======================
 
+
 Listed below are the different steps followed to perform the the analysis of qBG4-ChIP-seq.
 
 -   [**Sequencing (Fastq) processing: alignment, peak calling and consensus regions generation from peaks**](./Basic_Processing.md): adapter removal, alignment, species separation, duplicates removal, peak calling, downsample input files and repeat peak calling, extraction of multi2 regions (regions confirmed in 2 out of 4 replicates), merge old consensus (first round of experiments) to new consensus (second round of experiments).
