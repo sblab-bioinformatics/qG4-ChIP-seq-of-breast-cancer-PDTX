@@ -7,7 +7,7 @@ About this repository
 
 This repository collects bash and R scripts used for the analysis of the PDTX models by quantitative G4-ChIP-seq (qG4-ChIP-seq). 22 PDTX models have been profiled by qG4-ChIP-seq in 4 technical replicates plus input (5 libraries each).<br />
 
-In this study (PID, DOI:) we process data obteined from qG4-ChIP-seq. We identify regions with differential binding (up-regulated) in each of the 22 breast cancer model and we call these regions as ΔG4.<br /> We then explore and characterize all the 22 ΔG4 regions in respect to expression, to copy number alterations and to transcritpion factor binding profiles.
+In our study (PID, DOI:) we process data obteined from qG4-ChIP-seq. We identify regions with differential binding (up-regulated) in each of the 22 breast cancer model and we call these regions as ΔG4.<br /> We then explore and characterize all the 22 ΔG4 regions in respect to expression, to copy number alterations and to transcritpion factor binding profiles.
 
 [*Experimental design*](./Experimental_design_PDTXs).
 
