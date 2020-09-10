@@ -161,7 +161,7 @@ cd ~/fastq/trimmed/aligned/merged_lines
 
 out_dir_narrow='~/fastq/trimmed/aligned/merged_lines/macs2_individual_rep'
 mkdir $out_dir_narrow
-pdtx_ids=(AB636 AB577 PAR1022 AB580 STG139 AB555 AB551 STG282 AB790 STG195 PAR1006 STG197)
+pdtx_ids=(AB636 AB577 PAR1022 AB580 STG139 AB555 AB551 STG282 AB790 STG195 PAR1006)
 rep_num=(1 2 3 4)
 
 for curr_pdtx in ${pdtx_ids[@]}
@@ -432,6 +432,25 @@ Input bam files get downsampled to 25M reads. Definitive peaks have ben identifi
 -   call peaks
 -   generate multi2 (regions confirmed in 2 of the 4 peak replicates)
 -   generate consesus of all new PDTX (merging all peaks)
+
+Note: input libraries reported in the pubblication () have been subsampled to 25M (human) and 5M (drosophila). subsupling has been performed specificallyfor the following samples:
+AB521M
+AB863M
+HCI005
+HCI009
+STG139M_181
+STG139M_284
+STG143_284
+STG143_317
+STG201_181
+STG201_284
+STG316
+STG331
+VHIO098_181
+VHIO098_284
+VHIO179_181
+VHIO179_284
+
 
 ``` bash
 
