@@ -301,7 +301,7 @@ Consensus regions for each PDTX are those observed in 2 out of the 4 technical r
 ``` bash
 
 # === generate multi2 for all cases ===
-pdtx_ids=(AB636 AB577 PAR1022 AB580 STG139 AB555 AB551 STG282 AB790 STG195 PAR1006 STG197)
+pdtx_ids=(AB636 AB577 PAR1022 AB580 STG139 AB555 AB551 STG282 AB790 STG195 PAR1006)
 mkdir multi2_bed
 mkdir multi3_bed
 for case in ${pdtx_ids[@]}
@@ -360,7 +360,7 @@ for file in  *dm6.merged.q005.nomodel.all_peaks.narrowPeak
   done
   
 # === generate multi2 dm6 for all cases ===
-pdtx_ids=(AB636 AB577 PAR1022 AB580 STG139 AB555 AB551 STG282 AB790 STG195 PAR1006 STG197)
+pdtx_ids=(AB636 AB577 PAR1022 AB580 STG139 AB555 AB551 STG282 AB790 STG195 PAR1006)
 mkdir multi2_bed_dm6
 mkdir multi3_bed_dm6
 for case in ${pdtx_ids[@]}
@@ -505,7 +505,7 @@ Peaks are called with macs2 using default option.
 ## ==  peak calling using downsamples input bam (both hg19 and dm6) == 
 out_dir_narrow='~/fastq/trimmed/aligned/merged_lines/macs2_individual_rep_downsampled_inputs'
 mkdir $out_dir_narrow
-pdtx_ids=(AB636 AB577 PAR1022 AB580 STG139 AB555 AB551 STG282 AB790 STG195 PAR1006 STG197)
+pdtx_ids=(AB636 AB577 PAR1022 AB580 STG139 AB555 AB551 STG282 AB790 STG195 PAR1006)
 rep_num=(1 2 3 4)
 
 for curr_pdtx in ${pdtx_ids[@]}
@@ -577,7 +577,7 @@ Confimed peaks (we define them as `multi2`) are generated for each PDTX by selec
 # == hg19 cases == 
 # hg19.merged.q005.all_peaks.narrowPeak 
 # hg19.merged.q005.nomodel.all_peaks.narrowPeak
-pdtx_ids=(AB636 AB577 PAR1022 AB580 STG139 AB555 AB551 STG282 AB790 STG195 PAR1006 STG197)
+pdtx_ids=(AB636 AB577 PAR1022 AB580 STG139 AB555 AB551 STG282 AB790 STG195 PAR1006)
 peaks_folder=(~/fastq/trimmed/aligned/merged_lines/macs2_individual_rep_downsampled_inputs ~/fastq/trimmed/aligned/merged_lines/macs2_individual_rep)
 cd ~/fastq/trimmed/aligned/merged_lines
 for dir in ${peaks_folder[@]}
@@ -621,7 +621,7 @@ done
 # == dm6 cases == 
 # dm6.merged.q005.all_peaks.narrowPeak 
 # dm6.merged.q005.nomodel.all_peaks.narrowPeak
-pdtx_ids=(AB636 AB577 PAR1022 AB580 STG139 AB555 AB551 STG282 AB790 STG195 PAR1006 STG197)
+pdtx_ids=(AB636 AB577 PAR1022 AB580 STG139 AB555 AB551 STG282 AB790 STG195 PAR1006)
 peaks_folder=(~/fastq/trimmed/aligned/merged_lines/macs2_individual_rep_downsampled_inputs ~/fastq/trimmed/aligned/merged_lines/macs2_individual_rep)
 cd ~/fastq/trimmed/aligned/merged_lines
 for dir in ${peaks_folder[@]}
