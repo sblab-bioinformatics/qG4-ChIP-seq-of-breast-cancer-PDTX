@@ -16,7 +16,7 @@ Listed below are the different steps followed to perform the processing and anal
 Data
 ====
 
-Data produced using the qG4-ChIP-seq have been deposited at [E-MTAB-7949](https://www.ebi.ac.uk/arrayexpress/experiments/E-MTAB-7949). The sample file describing the deposited data is [here](sdrf.tsv). Additional information about the qG4-ChIP-seq protocol [here](idf.tsv).
+Data produced using the qG4-ChIP-seq have been deposited at [GSE152216](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE152216). The sample file describing the deposited data is [here](sdrf.tsv). Additional information about the qG4-ChIP-seq protocol [here](idf.tsv).
 
 The repository contains fastq files and processed files (peaks files, bw track files).
 
