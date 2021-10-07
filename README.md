@@ -18,7 +18,11 @@ Data
 
 Data produced using the qG4-ChIP-seq have been deposited at [GSE152216](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE152216). The sample file describing the deposited data is [here](sdrf.tsv). Additional information about the qG4-ChIP-seq protocol [here](idf.tsv).
 
-The repository contains fastq files and processed files (peaks files, bw track files).
+The repository contains files used to perform the high level analysis. 
+
+Differential regions for breast cancer can be found as bed files [here](./DG4R).
+
+
 
 Data analysis and code
 ======================
