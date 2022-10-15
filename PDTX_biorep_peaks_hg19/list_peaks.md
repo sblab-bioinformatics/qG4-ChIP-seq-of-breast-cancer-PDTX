@@ -1,4 +1,4 @@
-In this folder are stored  the peak files (consesus peaks across 4 tech. replicates) of each of the 22 PDTXs.
+In this folder are stored multi2 consesus regions (regions conserved in 2 out of 4 tech. replicates) of each of the 22 PDTXs.
 
 -/10/STG139M
 +/8/STG143
